@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Напиши моржу</title>
+
+<link rel="stylesheet" type="text/css" href="jqtransformplugin/jqtransform.css" />
+<link rel="stylesheet" type="text/css" href="formValidator/validationEngine.jquery.css" />
+<link rel="stylesheet" type="text/css" href="demo.css" />
+
+<?=$css?>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script type="text/javascript" src="jqtransformplugin/jquery.jqtransform.js"></script>
+<script type="text/javascript" src="formValidator/jquery.validationEngine.js"></script>
+
+<script type="text/javascript" src="script.js"></script>
+<?php 
+require 'connect.php';
+?>
+</head>
+
+<body>
+
+<div id="main-container">
+
+	<div id="form-container">
+    <h1>Форма</h1>
+    <h2>Привет, здесь ты можешь подружиться.</h2>
+    
+	<form action="scripts/form.php" method="post" name="forma">
+      <table width="100%" border="0" cellspacing="0" cellpadding="5">
+        <tr>
+          <td width="15%"><label for="Nickname">Имя:</label></td>
+          <td width="70%"><input type="text" name="Nickname" size="30"></td>
+          <td width="15%" id="errOffset">&nbsp;</td>
+        </tr>
+        <tr>
+          <td><label for="FIO">Фамилия:</label></td>
+          <td><input type="text" name="FIO" size="30"></td>
+          <td>&nbsp;</td>
+        </tr>
+               <tr>
+          <td><label for="facebook">Facebook</label></td>
+          <td><input name="facebook" type="text" value="" size="30"></td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td><label for="email">Email:</label></td>
+          <td><input type="text" name="email" size="30"></td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;</td>
+          <td colspan="2"><input id="submit" type="submit" value="Отправить данные">
+        </tr>
+      </table>
+      </form>
+      <?=$success?>
+    </div>
+
+</body>
+</html>
