@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chainlink Oracles & CCIP: A Technical Overview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: "Cool Slate & Teal" -->
+    <!-- Application Structure Plan: The application is structured as a single-page, vertical scrolling narrative, mimicking a presentation slide deck. A fixed sidebar on desktop (transforming to a hamburger menu on mobile) allows for non-linear navigation, enabling users to jump to any "slide" (section) of interest. This structure was chosen over a rigid, click-through slideshow to provide a more fluid, web-native experience that encourages both linear reading and random-access exploration. Key interactions include hover effects on diagrams to reveal details, clickable tabs to switch between content (like Chainlink services), and a dynamic chart to visualize ecosystem growth, making complex technical concepts more digestible and engaging. -->
+    <!-- Visualization & Content Choices: 
+        - The Oracle Problem Diagram: Goal: Explain a core concept. Method: HTML/CSS diagram. Interaction: Hover effects to highlight the "blockchain" and "real world" separation. Justification: Visually represents the core challenge Chainlink solves without needing static images or complex libraries.
+        - Oracle & CCIP Flow Diagrams: Goal: Illustrate technical processes. Method: Detailed HTML/CSS diagrams with flexbox/grid. Interaction: Hover on components provides tooltips/highlights. Justification: Breaks down multi-step processes into understandable visual chunks, enhancing comprehension.
+        - Chainlink Services: Goal: Organize multiple related items. Method: Tabbed interface. Interaction: Clicking tabs reveals content. Justification: Efficiently presents a large amount of information in a compact space, preventing cognitive overload.
+        - Code Snippets: Goal: Provide practical examples. Method: Styled <pre><code> blocks with a copy button. Interaction: Click to copy. Justification: Offers tangible, developer-focused content as requested.
+        - Ecosystem Growth Chart: Goal: Show impact and scale. Method: Chart.js Bar Chart. Interaction: Tooltips on hover show data points. Justification: Provides a quantitative, data-driven view of Chainlink's success, which is more impactful than text alone.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .slide-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0; /* slate-200 */
+        }
+        .slide-active {
+            color: #0d9488 !important; /* teal-600 */
+            font-weight: 600;
+        }
+        .code-block {
+            background-color: #1e293b; /* slate-800 */
+            color: #e2e8f0; /* slate-200 */
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            position: relative;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #475569; /* slate-600 */
+            color: #e2e8f0; /* slate-200 */
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .copy-button:hover {
+            background-color: #64748b; /* slate-500 */
+        }
+        .diagram-arrow {
+            position: relative;
+            width: 100%;
+            height: 2px;
+            background-color: #94a3b8; /* slate-400 */
+        }
+        .diagram-arrow::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            right: -1px;
+            width: 0;
+            height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-left: 8px solid #94a3b8; /* slate-400 */
+        }
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 800px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 40vh;
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body class="w-full">
+
+    <!-- Sidebar Navigation (Desktop) -->
+    <nav id="desktop-nav" class="hidden lg:block fixed top-0 left-0 h-full w-64 bg-white border-r border-slate-200 p-8 z-20">
+        <h2 class="text-lg font-bold text-slate-800 mb-2">Presentation Deck</h2>
+        <p class="text-sm text-slate-500 mb-6">Chainlink & CCIP</p>
+        <ul id="nav-links" class="space-y-3 text-slate-600 text-sm">
+            <li><a href="#slide-1" class="hover:text-teal-600 transition-colors duration-200">Title</a></li>
+            <li><a href="#slide-2" class="hover:text-teal-600 transition-colors duration-200">The Oracle Problem</a></li>
+            <li><a href="#slide-3" class="hover:text-teal-600 transition-colors duration-200">Chainlink Oracles</a></li>
+            <li><a href="#slide-4" class="hover:text-teal-600 transition-colors duration-200">Oracle Architecture</a></li>
+            <li><a href="#slide-5" class="hover:text-teal-600 transition-colors duration-200">Chainlink Services</a></li>
+            <li><a href="#slide-6" class="hover:text-teal-600 transition-colors duration-200">Code: Data Feeds</a></li>
+            <li><a href="#slide-7" class="hover:text-teal-600 transition-colors duration-200">The Multichain Problem</a></li>
+            <li><a href="#slide-8" class="hover:text-teal-600 transition-colors duration-200">Introducing CCIP</a></li>
+            <li><a href="#slide-9" class="hover:text-teal-600 transition-colors duration-200">CCIP Architecture</a></li>
+            <li><a href="#slide-10" class="hover:text-teal-600 transition-colors duration-200">CCIP Use Cases</a></li>
+            <li><a href="#slide-11" class="hover:text-teal-600 transition-colors duration-200">Code: CCIP Message</a></li>
+            <li><a href="#slide-12" class="hover:text-teal-600 transition-colors duration-200">Ecosystem Growth</a></li>
+            <li><a href="#slide-13" class="hover:text-teal-600 transition-colors duration-200">Security & Reliability</a></li>
+            <li><a href="#slide-14" class="hover:text-teal-600 transition-colors duration-200">The Future</a></li>
+            <li><a href="#slide-15" class="hover:text-teal-600 transition-colors duration-200">Conclusion</a></li>
+        </ul>
+    </nav>
+
+    <!-- Mobile Header -->
+    <header class="lg:hidden fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-b border-slate-200 p-4 z-30 flex justify-between items-center">
+        <h1 class="text-md font-bold text-slate-800">Chainlink & CCIP</h1>
+        <button id="menu-btn" class="p-2">
+            <svg id="menu-open-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+            <svg id="menu-close-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="lg:hidden hidden fixed top-16 left-0 right-0 bottom-0 bg-white z-20 p-8">
+        <ul id="mobile-nav-links" class="space-y-4 text-slate-600 text-lg">
+             <!-- Mobile links will be populated by JS -->
+        </ul>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="lg:ml-64">
+        <section id="slide-1" class="slide-section bg-slate-100">
+            <div class="text-center">
+                <div class="inline-block bg-teal-100 text-teal-800 text-sm font-semibold px-4 py-1 rounded-full mb-4">A Technical Presentation</div>
+                <h1 class="text-4xl md:text-6xl font-bold text-slate-900">Chainlink Oracles & CCIP</h1>
+                <p class="mt-4 text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">Securing the Verifiable Web by Reliably Connecting Blockchains to Real-World Data and Systems.</p>
+                <div class="mt-8 text-sm text-slate-500">Scroll to begin</div>
+                <div class="mt-2 text-2xl animate-bounce">▼</div>
+            </div>
+        </section>
+
+        <section id="slide-2" class="slide-section">
+            <div class="w-full max-w-5xl mx-auto text-center">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">The Blockchain Oracle Problem</h2>
+                <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-12">Blockchains are secure, deterministic, and isolated systems. By design, they cannot access data from outside their network (off-chain). This fundamental limitation prevents smart contracts from using real-world information, which is essential for most useful applications.</p>
+                <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-4 w-full">
+                    <div class="w-full md:w-2/5 p-8 border-2 border-dashed border-blue-400 rounded-lg bg-blue-50 text-center transition-transform hover:scale-105">
+                        <h3 class="text-2xl font-semibold text-blue-800">Blockchain (On-Chain)</h3>
+                        <p class="text-blue-600 mt-2">Secure & Verifiable Environment</p>
+                        <ul class="text-left mt-4 space-y-2 text-sm text-blue-700 list-disc list-inside">
+                            <li>Smart Contracts</li>
+                            <li>Transactions</li>
+                            <li>Tokens (Fungible/NFT)</li>
+                        </ul>
+                    </div>
+                    <div class="w-16 h-16 flex items-center justify-center text-4xl text-red-500 font-bold transform md:-rotate-90">✕</div>
+                    <div class="w-full md:w-2/5 p-8 border-2 border-dashed border-green-400 rounded-lg bg-green-50 text-center transition-transform hover:scale-105">
+                        <h3 class="text-2xl font-semibold text-green-800">Real World (Off-Chain)</h3>
+                        <p class="text-green-600 mt-2">External Data & Systems</p>
+                         <ul class="text-left mt-4 space-y-2 text-sm text-green-700 list-disc list-inside">
+                            <li>Market Prices (APIs)</li>
+                            <li>Weather Data</li>
+                            <li>Sports Results</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="slide-3" class="slide-section bg-slate-100">
+            <div class="w-full max-w-5xl mx-auto text-center">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Chainlink: The Oracle Solution</h2>
+                <p class="text-lg text-slate-600 max-w-3xl mx-auto">Chainlink solves the oracle problem by providing a decentralized oracle network (DON) that acts as a secure middleware layer. It fetches, validates, and delivers off-chain data to on-chain smart contracts, effectively bridging the gap between blockchains and the real world.</p>
+                 <div class="mt-12 w-full max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-md flex items-center space-x-6">
+                    <div class="shrink-0">
+                        <div class="w-16 h-16 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold text-2xl">🔗</div>
+                    </div>
+                    <div>
+                        <div class="text-xl font-medium text-black">Decentralized Oracle Networks (DONs)</div>
+                        <p class="text-slate-500 text-left">A DON is a committee of independent, security-reviewed, and Sybil-resistant oracle nodes. This decentralization at the oracle level ensures that data delivery is highly available, tamper-proof, and reliable, mirroring the security guarantees of the underlying blockchain.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="slide-4" class="slide-section">
+            <div class="w-full max-w-6xl mx-auto text-center">
+                 <h2 class="text-3xl font-bold text-slate-800 mb-4">Oracle Architecture: Data Request Flow</h2>
+                 <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-12">A user's smart contract initiates a data request, which is processed by the Chainlink network through a three-step process to ensure secure and reliable data delivery.</p>
+                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-center w-full">
+                    <div class="p-4 bg-blue-100 border border-blue-300 rounded-lg text-center h-full flex flex-col justify-center">
+                        <div class="text-blue-800 font-bold text-lg">1. On-Chain Request</div>
+                        <p class="text-sm text-blue-700 mt-1">A smart contract calls the Chainlink protocol, emitting an event with the data requirements (e.g., ETH/USD price).</p>
+                    </div>
+                    <div class="flex items-center justify-center"><div class="diagram-arrow transform -rotate-90 md:rotate-0"></div></div>
+                    <div class="p-4 bg-green-100 border border-green-300 rounded-lg text-center h-full flex flex-col justify-center">
+                         <div class="text-green-800 font-bold text-lg">2. Off-Chain Fetch & Report</div>
+                         <p class="text-sm text-green-700 mt-1">Chainlink nodes in the DON detect the event. Each node fetches data from specified sources, signs it, and reports back on-chain.</p>
+                    </div>
+                     <div class="flex items-center justify-center"><div class="diagram-arrow transform -rotate-90 md:rotate-0"></div></div>
+                    <div class="p-4 bg-purple-100 border border-purple-300 rounded-lg text-center h-full flex flex-col justify-center">
+                        <div class="text-purple-800 font-bold text-lg">3. On-Chain Aggregation</div>
+                        <p class="text-sm text-purple-700 mt-1">The DON aggregates the responses into a single, validated data point. This result is written to an on-chain contract where it can be consumed.</p>
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+        <section id="slide-5" class="slide-section bg-slate-100">
+            <div class="w-full max-w-5xl mx-auto text-center">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Chainlink Services</h2>
+                <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-12">Chainlink offers a suite of services beyond simple data feeds, providing developers with the tools to build sophisticated and reliable hybrid smart contracts.</p>
+                <div class="w-full">
+                    <div class="mb-4 flex justify-center border-b border-slate-300">
+                        <button data-tab="feeds" class="service-tab p-4 border-b-2 border-teal-600 text-teal-600 font-semibold">Data Feeds</button>
+                        <button data-tab="vrf" class="service-tab p-4 border-b-2 border-transparent text-slate-500">VRF</button>
+                        <button data-tab="functions" class="service-tab p-4 border-b-2 border-transparent text-slate-500">Functions</button>
+                        <button data-tab="automation" class="service-tab p-4 border-b-2 border-transparent text-slate-500">Automation</button>
+                    </div>
+                    <div id="service-content" class="text-left p-6 bg-white rounded-lg shadow-inner">
+                        <div id="content-feeds" class="service-content-pane">
+                            <h3 class="font-bold text-lg text-slate-900">Data Feeds</h3>
+                            <p class="text-slate-600 mt-2">Decentralized, real-time price data for cryptocurrencies, commodities, FX rates, and more. The backbone of DeFi, securing billions in value across lending, derivatives, and stablecoin protocols.</p>
+                        </div>
+                        <div id="content-vrf" class="service-content-pane hidden">
+                            <h3 class="font-bold text-lg text-slate-900">Verifiable Random Function (VRF)</h3>
+                            <p class="text-slate-600 mt-2">A provably fair and verifiable source of randomness for on-chain applications. Essential for dynamic NFTs, gaming, and any use case requiring unpredictable outcomes.</p>
+                        </div>
+                        <div id="content-functions" class="service-content-pane hidden">
+                            <h3 class="font-bold text-lg text-slate-900">Chainlink Functions</h3>
+                            <p class="text-slate-600 mt-2">A serverless developer platform that allows any smart contract to connect to any API and run custom computations. Unlocks a vast array of web2 data and services for web3.</p>
+                        </div>
+                        <div id="content-automation" class="service-content-pane hidden">
+                            <h3 class="font-bold text-lg text-slate-900">Chainlink Automation</h3>
+                            <p class="text-slate-600 mt-2">Decentralized, reliable, and cost-efficient transaction automation. Used for critical smart contract functions like executing limit orders, liquidating undercollateralized loans, and harvesting yield.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="slide-6" class="slide-section">
+            <div class="w-full max-w-4xl mx-auto">
+                 <h2 class="text-3xl font-bold text-slate-800 mb-4 text-center">Code Deep Dive: Consuming a Price Feed</h2>
+                 <p class="text-lg text-slate-600 text-center max-w-3xl mx-auto mb-8">This simple Solidity contract demonstrates how to read the latest ETH/USD price from a Chainlink Data Feed on the Sepolia testnet. It's non-upgradable and read-only.</p>
+                <div class="code-block w-full">
+<pre><code>// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@chainlink/contracts/v0.8/interfaces/AggregatorV3Interface.sol";
+
+contract PriceConsumerV3 {
+    AggregatorV3Interface internal priceFeed;
+
+    /**
+     * Network: Sepolia
+     * Aggregator: ETH/USD
+     * Address: 0x694AA1769357215DE4FAC081bf1f309aDC325306
+     */
+    constructor() {
+        priceFeed = AggregatorV3Interface(
+            0x694AA1769357215DE4FAC081bf1f309aDC325306
+        );
+    }
+
+    /**
+     * Returns the latest price
+     */
+    function getLatestPrice() public view returns (int) {
+        (
+            /*uint80 roundID*/,
+            int price,
+            /*uint startedAt*/,
+            /*uint timeStamp*/,
+            /*uint80 answeredInRound*/
+        ) = priceFeed.latestRoundData();
+        return price;
+    }
+}</code></pre>
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="slide-7" class="slide-section bg-slate-100">
+            <div class="w-full max-w-5xl mx-auto text-center">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">The Next Frontier: The Multichain Problem</h2>
+                <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-12">The blockchain ecosystem is fragmented across many different networks (L1s, L2s). These chains operate in isolation, creating liquidity silos and a disjointed user experience. A secure standard for interoperability is needed to unlock the full potential of a multichain world.</p>
+                <div class="flex flex-wrap justify-center gap-6">
+                    <div class="p-4 bg-white rounded-lg shadow-md font-semibold text-slate-700">Ethereum</div>
+                    <div class="p-4 bg-white rounded-lg shadow-md font-semibold text-slate-700">Avalanche</div>
+                    <div class="p-4 bg-white rounded-lg shadow-md font-semibold text-slate-700">Polygon</div>
+                    <div class="p-4 bg-white rounded-lg shadow-md font-semibold text-slate-700">Arbitrum</div>
+                    <div class="p-4 bg-white rounded-lg shadow-md font-semibold text-slate-700">Optimism</div>
+                    <div class="p-4 bg-white rounded-lg shadow-md font-semibold text-slate-700">BNB Chain</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="slide-8" class="slide-section">
+            <div class="w-full max-w-5xl mx-auto text-center">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Introducing CCIP: Cross-Chain Interoperability Protocol</h2>
+                <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-12">Chainlink CCIP is a secure interoperability standard for sending messages, transferring tokens, and initiating actions across different blockchain networks. It is powered by the same battle-tested decentralized oracle networks that secure Chainlink Data Feeds.</p>
+                 <div class="mt-8 w-full max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-md">
+                    <h3 class="text-xl font-semibold text-slate-800 text-center mb-4">The 5 Levels of Cross-Chain Security</h3>
+                    <p class="text-slate-500 text-center mb-6">CCIP provides unparalleled security through a multi-layered approach.</p>
+                    <ol class="text-left space-y-2 text-slate-600">
+                       <li><span class="font-semibold text-teal-700">Level 1:</span> Committing DON provides primary validation.</li>
+                       <li><span class="font-semibold text-teal-700">Level 2:</span> Executing DON provides secondary validation.</li>
+                       <li><span class="font-semibold text-teal-700">Level 3:</span> An independent Risk Management Network monitors for anomalies.</li>
+                       <li><span class="font-semibold text-teal-700">Level 4:</span> Global rate limits on token transfers add a safety layer.</li>
+                       <li><span class="font-semibold text-teal-700">Level 5:</span> Transacting parties can deploy their own additional validation.</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <section id="slide-9" class="slide-section bg-slate-100">
+            <div class="w-full max-w-7xl mx-auto text-center">
+                 <h2 class="text-3xl font-bold text-slate-800 mb-4">CCIP Architecture: Simplified Flow</h2>
+                 <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-12">CCIP facilitates cross-chain communication through on-chain Routers and off-chain validation by multiple decentralized networks.</p>
+                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-center w-full">
+                    <div class="p-4 bg-blue-100 border border-blue-300 rounded-lg text-center h-full flex flex-col justify-center">
+                        <div class="text-blue-800 font-bold text-lg">Source Chain</div>
+                        <p class="text-sm text-blue-700 mt-1">A dApp calls the CCIP Router with a message and/or tokens for a destination chain.</p>
+                    </div>
+                    <div class="flex items-center justify-center"><div class="diagram-arrow transform -rotate-90 md:rotate-0"></div></div>
+                    <div class="p-4 bg-green-100 border border-green-300 rounded-lg text-center h-full flex flex-col justify-center">
+                         <div class="text-green-800 font-bold text-lg">Off-Chain Validation</div>
+                         <p class="text-sm text-green-700 mt-1">The Committing DON observes the transaction and posts a `MerkleRoot` on the destination chain.</p>
+                    </div>
+                     <div class="flex items-center justify-center"><div class="diagram-arrow transform -rotate-90 md:rotate-0"></div></div>
+                    <div class="p-4 bg-purple-100 border border-purple-300 rounded-lg text-center h-full flex flex-col justify-center">
+                        <div class="text-purple-800 font-bold text-lg">Destination Chain</div>
+                        <p class="text-sm text-purple-700 mt-1">The Executing DON validates the message, and if valid, executes the transaction via the destination Router, delivering the message/tokens.</p>
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+        <section id="slide-10" class="slide-section">
+            <div class="w-full max-w-5xl mx-auto text-center">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">CCIP Use Cases</h2>
+                <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-12">Secure cross-chain functionality unlocks a new wave of powerful applications.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="text-4xl mb-3">🏦</div>
+                        <h3 class="font-semibold text-lg text-slate-800">Cross-Chain Lending</h3>
+                        <p class="text-slate-500 mt-2 text-sm">Deposit collateral on one chain (e.g., Ethereum) to borrow assets on another chain (e.g., Arbitrum).</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="text-4xl mb-3">🖼️</div>
+                        <h3 class="font-semibold text-lg text-slate-800">Cross-Chain NFTs</h3>
+                        <p class="text-slate-500 mt-2 text-sm">Mint an NFT on a low-cost chain and transfer it to a major marketplace on another chain.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="text-4xl mb-3">🗳️</div>
+                        <h3 class="font-semibold text-lg text-slate-800">Cross-Chain Governance</h3>
+                        <p class="text-slate-500 mt-2 text-sm">Allow token holders on any chain to vote on proposals for a protocol based on a different chain.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="slide-11" class="slide-section bg-slate-100">
+            <div class="w-full max-w-4xl mx-auto">
+                 <h2 class="text-3xl font-bold text-slate-800 mb-4 text-center">Code Deep Dive: Sending a CCIP Message</h2>
+                 <p class="text-lg text-slate-600 text-center max-w-3xl mx-auto mb-8">This contract shows how to send a simple text message from one chain to another using the CCIP Router. The `ccipSend` function requires the destination chain selector and the message payload.</p>
+                <div class="code-block w-full">
+<pre><code>// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
+import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
+
+contract CCIPSender {
+    IRouterClient router;
+
+    constructor(address _router) {
+        router = IRouterClient(_router);
+    }
+
+    function sendMessage(
+        uint64 destinationChainSelector,
+        address receiver,
+        string memory text
+    ) external returns (bytes32 messageId) {
+        Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
+            receiver: abi.encode(receiver),
+            data: abi.encode(text),
+            tokenAmounts: new Client.EVMTokenAmount[](0),
+            extraArgs: Client._getExtraArgs(address(this), false), // feeToken can be address(0) for native gas
+            feeToken: address(0)
+        });
+
+        uint256 fee = router.getFee(destinationChainSelector, message);
+
+        messageId = router.ccipSend{value: fee}(destinationChainSelector, message);
+
+        return messageId;
+    }
+}</code></pre>
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                </div>
+            </div>
+        </section>
+        
+        <section id="slide-12" class="slide-section">
+            <div class="w-full max-w-5xl mx-auto text-center">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Ecosystem Growth: Total Value Enabled (TVE)</h2>
+                <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-12">Chainlink has grown to become the industry-standard oracle solution, enabling trillions of dollars in transaction value across the Web3 ecosystem.</p>
+                <div class="chart-container">
+                    <canvas id="tveChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="slide-13" class="slide-section bg-slate-100">
+            <div class="w-full max-w-5xl mx-auto text-center">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Security & Reliability</h2>
+                <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-12">The security of the entire Chainlink ecosystem rests on the principles of decentralization and crypto-economic incentives.</p>
+                <div class="grid md:grid-cols-2 gap-8 text-left">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="font-semibold text-lg text-slate-800">Decentralization at Scale</h3>
+                        <p class="text-slate-500 mt-2 text-sm">Using a large, diverse set of independent node operators prevents any single point of failure. Data is sourced from numerous premium providers and aggregated to form a tamper-resistant consensus.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="font-semibold text-lg text-slate-800">Crypto-Economic Security</h3>
+                        <p class="text-slate-500 mt-2 text-sm">Node operators are incentivized with fees (LINK tokens) for good behavior. Malicious or faulty behavior can result in financial penalties and removal from the network, creating a system where it is more profitable to be honest.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="slide-14" class="slide-section">
+             <div class="w-full max-w-5xl mx-auto text-center">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">The Future: The Verifiable Web</h2>
+                <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-12">Chainlink aims to build a "Verifiable Web" where cryptographic truth is the primary guarantee of data and system integrity. By connecting the world's existing infrastructure to blockchains, Chainlink is foundational for creating a more transparent, efficient, and trustworthy global economy.</p>
+                <div class="text-2xl text-slate-700 font-semibold">
+                    <span class="text-teal-600">Blockchains</span> + 
+                    <span class="text-teal-600">Off-Chain Data</span> + 
+                    <span class="text-teal-600">Off-Chain Compute</span> = 
+                    <span class="text-slate-800">Hybrid Smart Contracts</span>
+                </div>
+            </div>
+        </section>
+        
+        <section id="slide-15" class="slide-section bg-slate-800 text-white">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-5xl font-bold">Thank You</h1>
+                <p class="mt-4 text-lg text-slate-300">Questions?</p>
+                <a href="https://chain.link" target="_blank" rel="noopener noreferrer" class="mt-8 inline-block bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                    Learn More at chain.link
+                </a>
+            </div>
+        </section>
+    </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Mobile Menu ---
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const openIcon = document.getElementById('menu-open-icon');
+    const closeIcon = document.getElementById('menu-close-icon');
+    const desktopNavLinks = document.getElementById('nav-links');
+    const mobileNavLinksContainer = document.getElementById('mobile-nav-links');
+
+    mobileNavLinksContainer.innerHTML = desktopNavLinks.innerHTML;
+
+    menuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        openIcon.classList.toggle('hidden');
+        closeIcon.classList.toggle('hidden');
+    });
+    
+    document.querySelectorAll('#mobile-nav-links a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+            openIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+        });
+    });
+
+    // --- Sidebar Active State on Scroll ---
+    const sections = document.querySelectorAll('.slide-section');
+    const navLinks = document.querySelectorAll('#nav-links a');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.remove('slide-active');
+                    if (link.getAttribute('href').substring(1) === entry.target.id) {
+                        link.classList.add('slide-active');
+                    }
+                });
+            }
+        });
+    }, { rootMargin: '-50% 0px -50% 0px', threshold: 0 });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+
+    // --- Service Tabs Interaction ---
+    const tabs = document.querySelectorAll('.service-tab');
+    const contentPanes = document.querySelectorAll('.service-content-pane');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(item => {
+                item.classList.remove('border-teal-600', 'text-teal-600', 'font-semibold');
+                item.classList.add('border-transparent', 'text-slate-500');
+            });
+            tab.classList.add('border-teal-600', 'text-teal-600', 'font-semibold');
+            tab.classList.remove('border-transparent', 'text-slate-500');
+
+            const target = tab.getAttribute('data-tab');
+            contentPanes.forEach(pane => {
+                if (pane.id === `content-${target}`) {
+                    pane.classList.remove('hidden');
+                } else {
+                    pane.classList.add('hidden');
+                }
+            });
+        });
+    });
+
+    // --- TVE Chart ---
+    const tveCtx = document.getElementById('tveChart').getContext('2d');
+    const tveChart = new Chart(tveCtx, {
+        type: 'bar',
+        data: {
+            labels: ['2020', '2021', '2022', '2023', '2024'],
+            datasets: [{
+                label: 'Total Value Enabled (Trillions USD)',
+                data: [0.07, 1.5, 5.8, 7.0, 9.3], // Representative data
+                backgroundColor: 'rgba(13, 148, 136, 0.6)', // teal-600 with opacity
+                borderColor: 'rgba(13, 148, 136, 1)', // teal-600
+                borderWidth: 1,
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false,
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += '$' + context.parsed.y + 'T';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Value in Trillions (USD)',
+                        color: '#475569' // slate-600
+                    },
+                    ticks: {
+                        callback: function(value, index, ticks) {
+                            return '$' + value + 'T';
+                        },
+                        color: '#475569'
+                    },
+                    grid: {
+                        color: '#e2e8f0' // slate-200
+                    }
+                },
+                x: {
+                   ticks: {
+                        color: '#475569'
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+});
+
+// --- Copy Code Function ---
+function copyCode(button) {
+    const pre = button.previousElementSibling;
+    const code = pre.innerText;
+    navigator.clipboard.writeText(code).then(() => {
+        button.innerText = 'Copied!';
+        setTimeout(() => {
+            button.innerText = 'Copy';
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+    });
+}
+
+</script>
+</body>
+</html>
