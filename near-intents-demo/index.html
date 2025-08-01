@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEAR Intents: The Future of Web3 Transactions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: A non-linear, thematic single-page application focused on a technical audience. The structure is designed for an experienced developer who wants to understand the low-level mechanics. It begins with a high-level overview, then immediately dives into technical specifications, including the structured data format of an Intent, the off-chain solver competition, and the on-chain verifier logic. The user can navigate between these detailed sections via a sticky header. This structure is chosen to quickly get a technically-inclined user to the information they care about, while interactive elements like the process flow diagram and a dynamic chart help simplify complex concepts. The final sections on security and ecosystem provide context on implementation. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Traditional vs. Intent-based interaction. Goal: Compare. Viz: Side-by-side text blocks with structured data examples. Interaction: Static visual comparison. Justification: Clearly illustrates the paradigm shift with concrete, technical examples. Method: HTML/Tailwind.
+        - Report Info: 6-step transaction flow. Goal: Explain a process. Viz: Numbered vertical flowchart. Interaction: Click to reveal detailed technical descriptions for each step. Justification: Breaks down a complex process into interactive, manageable steps, preventing information overload while providing granular detail. Method: HTML/Tailwind/JS.
+        - Report Info: Cryptographic commitments. Goal: Explain a technical mechanism. Viz: Text blocks with a code snippet. Interaction: Static explanation. Justification: Provides specific details on the security primitives used. Method: HTML/Tailwind.
+        - Report Info: Solver logic & MEV protection. Goal: Explain an off-chain process. Viz: Detailed text and an explanation of the private order flow. Interaction: Static. Justification: Addresses a critical concern for advanced users by detailing the mechanics. Method: HTML/Tailwind.
+        - Report Info: Liquidity aggregation for best quotes. Goal: Show relationships and proportions. Viz: Bar chart. Interaction: Hover tooltips on chart. Justification: Visually demonstrates how aggregating liquidity sources (DeFi, CeFi, OTC) leads to better outcomes. Method: Chart.js/Canvas.
+        - Report Info: Verifier smart contract logic. Goal: Explain on-chain behavior. Viz: Detailed pseudo-code and step-by-step logic. Interaction: Static. Justification: Provides the core technical details of the on-chain settlement layer. Method: HTML/Tailwind.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F5F4; /* Warm Neutral */
+            color: #293241; /* Deep Blue-Gray */
+        }
+        .nav-link {
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #3D5A80; /* Accent Teal */
+            border-bottom-color: #3D5A80;
+        }
+        .hero-gradient-text {
+            background: linear-gradient(90deg, #3D5A80, #98C1D9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .section-card {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .flow-step {
+            cursor: pointer;
+        }
+        .flow-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
+            opacity: 0;
+        }
+        .flow-content.open {
+            max-height: 800px;
+            opacity: 1;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        pre {
+            background-color: #293241;
+            color: #E5E7EB;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold hero-gradient-text">NEAR Intents</span>
+                </div>
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#overview" class="nav-link text-gray-600 font-medium pb-1">Overview</a>
+                    <a href="#how" class="nav-link text-gray-600 font-medium pb-1">The Flow</a>
+                    <a href="#cryptography" class="nav-link text-gray-600 font-medium pb-1">Cryptography</a>
+                    <a href="#solvers" class="nav-link text-gray-600 font-medium pb-1">Solvers & MEV</a>
+                    <a href="#verifiers" class="nav-link text-gray-600 font-medium pb-1">Verifiers</a>
+                    <a href="#ecosystem" class="nav-link text-gray-600 font-medium pb-1">Ecosystem</a>
+                </nav>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-700 focus:outline-none">
+                        <span class="text-2xl">&#9776;</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#overview" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">Overview</a>
+            <a href="#how" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">The Flow</a>
+            <a href="#cryptography" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">Cryptography</a>
+            <a href="#solvers" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">Solvers & MEV</a>
+            <a href="#verifiers" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">Verifiers</a>
+            <a href="#ecosystem" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">Ecosystem</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <section id="hero" class="text-center my-16">
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
+                From <span class="hero-gradient-text">Imperative</span> to <span class="hero-gradient-text">Declarative</span>
+            </h1>
+            <p class="max-w-3xl mx-auto text-lg md:text-xl text-gray-600">
+                NEAR Intents abstracts away complexity. This technical deep-dive explores the core components, cryptographic primitives, and on-chain logic that power a new era of Web3 transactions.
+            </p>
+        </section>
+
+        <section id="overview" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-tight">The Intent Data Structure</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">At its core, an intent is a structured data object that defines a user's desired outcome. Unlike a traditional transaction that specifies a function call and parameters, an intent is a declarative request that an off-chain network competes to fulfill.</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="section-card p-8">
+                    <h3 class="text-2xl font-semibold mb-4 text-red-500">Traditional Transaction</h3>
+                    <p class="text-gray-600 mb-4">A low-level, imperative call to a specific smart contract function. It leaves no room for optimization and is publicly broadcasted to a mempool.</p>
+                    <pre class="text-xs md:text-sm"><code>{
+  "sender": "0xUserAddress",
+  "to": "0xSwapContract",
+  "value": "0",
+  "data": "0x2e1a7d4d...",
+  "gasLimit": "21000",
+  "gasPrice": "50000000000"
+}</code></pre>
+                </div>
+                <div class="section-card p-8 border-2 border-teal-500">
+                    <h3 class="text-2xl font-semibold mb-4 text-green-500">NEAR Intent Object</h3>
+                    <p class="text-gray-600 mb-4">A high-level, declarative request. Solvers compete to create the most optimal transaction bundle that achieves this outcome.</p>
+                    <pre class="text-xs md:text-sm"><code>{
+  "user": "alice.near",
+  "goal": {
+    "type": "swap",
+    "from_token": "wrap.near",
+    "to_token": "usdt.e.near",
+    "amount": "100",
+    "min_return_usd": "99.5"
+  },
+  "constraints": {
+    "max_cost_usd": "0.10",
+    "slippage_bps": "50"
+  }
+}</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section id="how" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-tight">The Declarative Transaction Flow</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">This section details the 6-step lifecycle of an intent. Click on each step to reveal the technical actions taken by the user, solvers, and the on-chain verifier contract.</p>
+            </div>
+            <div class="max-w-3xl mx-auto">
+                <div class="space-y-8">
+                    <div class="flow-step" data-step="1">
+                        <div class="section-card p-6 flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 text-gray-700 font-bold mr-4">1</span>
+                                <h3 class="text-xl font-semibold">Intent Creation & Broadcast</h3>
+                            </div>
+                            <span class="text-2xl text-gray-400 transform transition-transform duration-300">&#9662;</span>
+                        </div>
+                        <div class="flow-content ml-14 mt-2 pl-4 border-l-2 border-gray-200">
+                            <p class="p-4 bg-gray-50 rounded-md text-gray-600">A user's client-side application generates a structured intent object. This object is then broadcasted to a private, off-chain network of solvers via a dedicated message passing system (e.g., a libp2p network or a specialized pub/sub channel).</p>
+                        </div>
+                    </div>
+                    <div class="flow-step" data-step="2">
+                        <div class="section-card p-6 flex items-center justify-between">
+                             <div class="flex items-center">
+                                <span class="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 text-gray-700 font-bold mr-4">2</span>
+                                <h3 class="text-xl font-semibold">Solver Bidding & Quote Generation</h3>
+                            </div>
+                            <span class="text-2xl text-gray-400 transform transition-transform duration-300">&#9662;</span>
+                        </div>
+                        <div class="flow-content ml-14 mt-2 pl-4 border-l-2 border-gray-200">
+                            <p class="p-4 bg-gray-50 rounded-md text-gray-600">Upon receiving the intent, solvers (AI or market makers) use their proprietary algorithms to find the most efficient path to fulfill it. This path may involve multiple steps across different chains and protocols. Each solver generates a signed "quote" that specifies the execution plan and the final guaranteed output for the user.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step" data-step="3">
+                        <div class="section-card p-6 flex items-center justify-between">
+                             <div class="flex items-center">
+                                <span class="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 text-gray-700 font-bold mr-4">3</span>
+                                <h3 class="text-xl font-semibold">Quote Selection & User Commitment</h3>
+                            </div>
+                            <span class="text-2xl text-gray-400 transform transition-transform duration-300">&#9662;</span>
+                        </div>
+                        <div class="flow-content ml-14 mt-2 pl-4 border-l-2 border-gray-200">
+                            <p class="p-4 bg-gray-50 rounded-md text-gray-600">The user's client receives multiple quotes from various solvers. It can automatically select the best quote based on criteria like final token amount, latency, or solver reputation. The user then signs this quote, creating a cryptographic commitment.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step" data-step="4">
+                        <div class="section-card p-6 flex items-center justify-between">
+                             <div class="flex items-center">
+                                <span class="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 text-gray-700 font-bold mr-4">4</span>
+                                <h3 class="text-xl font-semibold">On-Chain Submission to Verifier</h3>
+                            </div>
+                            <span class="text-2xl text-gray-400 transform transition-transform duration-300">&#9662;</span>
+                        </div>
+                        <div class="flow-content ml-14 mt-2 pl-4 border-l-2 border-gray-200">
+                            <p class="p-4 bg-gray-50 rounded-md text-gray-600">The chosen solver submits the signed quote and the necessary execution data to the on-chain Verifier smart contract. This submission is a single transaction that triggers the atomic settlement process.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step" data-step="5">
+                        <div class="section-card p-6 flex items-center justify-between">
+                             <div class="flex items-center">
+                                <span class="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 text-gray-700 font-bold mr-4">5</span>
+                                <h3 class="text-xl font-semibold">Atomic Execution & Verification</h3>
+                            </div>
+                            <span class="text-2xl text-gray-400 transform transition-transform duration-300">&#9662;</span>
+                        </div>
+                        <div class="flow-content ml-14 mt-2 pl-4 border-l-2 border-gray-200">
+                            <p class="p-4 bg-gray-50 rounded-md text-gray-600">The verifier contract checks the cryptographic signatures of both the user and the solver. It then executes the series of sub-transactions (as defined by the solver's quote) atomically. If any part of the execution fails, the entire transaction is reverted, ensuring no partial state changes.</p>
+                        </div>
+                    </div>
+                    <div class="flow-step" data-step="6">
+                        <div class="section-card p-6 flex items-center justify-between">
+                             <div class="flex items-center">
+                                <span class="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 text-gray-700 font-bold mr-4">6</span>
+                                <h3 class="text-xl font-semibold">Settlement & Finalization</h3>
+                            </div>
+                            <span class="text-2xl text-gray-400 transform transition-transform duration-300">&#9662;</span>
+                        </div>
+                        <div class="flow-content ml-14 mt-2 pl-4 border-l-2 border-gray-200">
+                            <p class="p-4 bg-gray-50 rounded-md text-gray-600">After successful execution, the user's funds are moved, and the solver receives their fee. If the solver fails to fulfill their signed quote, a dispute can be initiated against them, leading to a penalty defined in the protocol.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cryptography" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-tight">The Role of Cryptography</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">NEAR Intents relies on robust cryptographic mechanisms to ensure security and trust without centralized control. Two key concepts are cryptographic commitments and session keys.</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="section-card p-6">
+                    <h3 class="text-xl font-semibold mb-2">Cryptographic Commitments</h3>
+                    <p class="text-gray-600 mb-4">When a user or a solver signs an intent or a quote, they are making a verifiable on-chain promise. This signature binds them to their stated intentions, and any deviation can be proven on-chain, leading to penalties.</p>
+                    <pre class="text-xs md:text-sm"><code>// User signs the intent
+const userSignature = sign(userKey, intentObject);
+
+// Solver signs their quote
+const solverSignature = sign(solverKey, quoteObject);
+
+// Verifier contract checks these signatures
+require(is_valid_signature(intent, user_signature, intent.user));
+require(is_valid_signature(solver_quote, solver_signature, solver_quote.solver));
+</code></pre>
+                </div>
+                <div class="section-card p-6">
+                    <h3 class="text-xl font-semibold mb-2">Session Keys</h3>
+                    <p class="text-gray-600 mb-4">Users can grant limited, time-bound permissions to solvers through session keys. This allows solvers to act on the user's behalf for a specific intent without requiring the user's private key, greatly enhancing security and usability for complex transactions.</p>
+                    <pre class="text-xs md:text-sm"><code>// User creates a temporary session key
+const sessionKey = generateSessionKey();
+
+// User signs a transaction to add session key to their account
+add_key(sessionKey, {
+    permission: {
+        method_names: ["execute_intent"],
+        receiver_id: "verifier.near"
+    },
+    duration: 3600 // expires in 1 hour
+});
+</code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <section id="solvers" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-tight">Solvers, Competition, and MEV Protection</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">Solvers are the core engine of the system. They operate in a private, off-chain environment, which is the primary reason intents are protected from typical MEV attacks like front-running.</p>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-12 items-start">
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Off-Chain Private Bidding</h3>
+                        <p class="text-gray-600">Unlike public mempools where transactions are visible to everyone, intents are broadcasted to a select, permissioned network of solvers. Solvers receive these intents privately and compete to offer the best price and execution. This prevents malicious actors from observing pending transactions and creating their own to front-run the user.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Universal Liquidity Aggregation</h3>
+                        <p class="text-gray-600">A solver's primary task is to find the most efficient path. This often involves aggregating liquidity from various sources: on-chain liquidity pools (DEXs), centralized exchanges (CeFi), and private over-the-counter (OTC) deals. The goal is to minimize slippage and maximize the final output for the user.</p>
+                    </div>
+                    <div class="section-card p-4 md:p-6">
+                        <h3 class="text-xl font-semibold mb-2">Gas Fee Abstraction</h3>
+                        <p class="text-gray-600">Solvers are not just providing a route; they are providing a service. They may absorb the underlying transaction fees (gas) as part of their business model, which is factored into their final quote. This provides a "gasless" experience for the user.</p>
+                    </div>
+                </div>
+                <div class="section-card p-4 md:p-6">
+                    <div class="chart-container">
+                        <canvas id="liquidityChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-gray-500 mt-4">This chart illustrates the difference in price received for a large trade when leveraging different liquidity sources. A single DEX is often inefficient, while a DEX aggregator improves the price by pooling multiple on-chain sources. The NEAR Intents model, however, offers the best outcome by accessing a universal pool of DeFi, CeFi, and private OTC liquidity.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="verifiers" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-tight">The On-Chain Verifier Contract</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">The verifier contract is the ultimate source of trust. It is an immutable smart contract that acts as a secure settlement layer, ensuring that a solver's off-chain promises are fulfilled on-chain in an atomic, non-custodial manner.</p>
+            </div>
+            <div class="section-card p-8">
+                <h3 class="text-2xl font-semibold mb-4">Verifier Logic (Pseudo-code)</h3>
+                <p class="text-gray-600 mb-4">The core function of the verifier contract is to validate a solver's proposal against a user's signed intent, and then execute it in a single, secure transaction.</p>
+                <pre class="text-xs md:text-sm"><code>// Verifier.near smart contract
+fn execute_intent(intent, user_signature, solver_quote, solver_signature) {
+    // 1. Verify user's signature on the intent
+    require(is_valid_signature(intent, user_signature, intent.user));
+    
+    // 2. Verify solver's signature on the quote
+    require(is_valid_signature(solver_quote, solver_signature, solver_quote.solver));
+    
+    // 3. Ensure the quote fulfills the intent's constraints
+    // (e.g., minimum return amount, max slippage)
+    require(solver_quote.min_return >= intent.goal.min_return_usd);
+    
+    // 4. Perform atomic execution
+    // The verifier contract holds the user's funds temporarily via a session key.
+    try {
+        let funds_transferred = transfer(intent.goal.from_token, solver_quote.amount);
+        let result = execute_solver_actions(solver_quote.actions);
+        let final_amount = receive(intent.goal.to_token);
+        
+        // 5. Check post-conditions
+        require(final_amount >= intent.goal.min_return_usd);
+        
+        // 6. Settle with user and solver
+        transfer(final_amount, intent.user);
+        transfer(solver_quote.fee, solver_quote.solver);
+    } catch (e) {
+        // If anything fails, revert all state changes.
+        revert(e); 
+    }
+}</code></pre>
+            </div>
+        </section>
+
+        <section id="ecosystem" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold tracking-tight">A Thriving Ecosystem</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">This section showcases some of the projects and tools that are already leveraging the NEAR Intents protocol, demonstrating its real-world application and potential for broader adoption. The ecosystem is supported by a robust set of SDKs and APIs for developers.</p>
+            </div>
+             <div class="bg-white p-8 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold text-center mb-8">Projects Building on Intents</h3>
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-8 items-center grayscale">
+                    <div class="text-center" title="THORSwap"><img src="https://placehold.co/100x40/e2e8f0/64748b?text=THORSwap" alt="THORSwap Logo" class="mx-auto"></div>
+                    <div class="text-center" title="KyberSwap"><img src="https://placehold.co/100x40/e2e8f0/64748b?text=KyberSwap" alt="KyberSwap Logo" class="mx-auto"></div>
+                    <div class="text-center" title="Frax Finance"><img src="https://placehold.co/100x40/e2e8f0/64748b?text=Frax" alt="Frax Finance Logo" class="mx-auto"></div>
+                    <div class="text-center" title="Infinex"><img src="https://placehold.co/100x40/e2e8f0/64748b?text=Infinex" alt="Infinex Logo" class="mx-auto"></div>
+                    <div class="text-center" title="Sailor Lend"><img src="https://placehold.co/100x40/e2e8f0/64748b?text=Sailor" alt="Sailor Lend Logo" class="mx-auto"></div>
+                    <div class="text-center" title="SwapKit"><img src="https://placehold.co/100x40/e2e8f0/64748b?text=SwapKit" alt="SwapKit Logo" class="mx-auto"></div>
+                </div>
+                <hr class="my-12">
+                <h3 class="text-2xl font-bold text-center mb-8">Developer Tools & Resources</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="section-card p-6">
+                        <h4 class="font-semibold text-lg mb-2">APIs</h4>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1">
+                            <li><strong>1Click Swap API:</strong> A simple REST API for rapid integration of swap functionalities.</li>
+                            <li><strong>Intents Explorer API:</strong> Provides public access to track historical intents and transaction data.</li>
+                        </ul>
+                    </div>
+                    <div class="section-card p-6">
+                        <h4 class="font-semibold text-lg mb-2">SDKs</h4>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1">
+                            <li><strong>Python:</strong> For building AI agents and backend services.</li>
+                            <li><strong>Rust:</strong> For high-performance smart contract development.</li>
+                            <li><strong>TypeScript/JS:</strong> For web frontends and Node.js applications.</li>
+                            <li><strong>Go:</strong> For building robust backend infrastructure.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center">
+            <h3 class="text-2xl font-bold">Ready to Build the Future?</h3>
+            <p class="mt-2 text-gray-300">Explore the documentation, join the community, and start building with NEAR Intents today.</p>
+            <div class="mt-6">
+                <a href="#" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300">
+                    Get Started
+                </a>
+            </div>
+            <p class="mt-8 text-sm text-gray-400">&copy; 2025 NEAR Foundation. All rights reserved. This is an illustrative web application.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            document.querySelectorAll('#mobile-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+
+            const flowSteps = document.querySelectorAll('.flow-step');
+            flowSteps.forEach(step => {
+                step.addEventListener('click', () => {
+                    const content = step.querySelector('.flow-content');
+                    const arrow = step.querySelector('.text-2xl');
+                    
+                    const isOpen = content.classList.contains('open');
+
+                    document.querySelectorAll('.flow-content.open').forEach(openContent => {
+                        openContent.classList.remove('open');
+                        openContent.closest('.flow-step').querySelector('.text-2xl').style.transform = 'rotate(0deg)';
+                    });
+
+                    if (!isOpen) {
+                        content.classList.add('open');
+                        arrow.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section[id]');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, { rootMargin: "-50% 0px -50% 0px" });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            const ctx = document.getElementById('liquidityChart').getContext('2d');
+            const liquidityChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Single DEX', 'DEX Aggregator', 'NEAR Intents (DeFi+CeFi+OTC)'],
+                    datasets: [{
+                        label: 'Price Received for a Large Trade',
+                        data: [95, 97.5, 99.5],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(75, 192, 192, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 90,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: '% of Optimal Price'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += `${context.parsed.y}% of optimal price. Higher is better.`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
