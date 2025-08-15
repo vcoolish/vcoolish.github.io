@@ -10,12 +10,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Calm Harmony -->
-    <!-- Application Structure Plan: The application uses a thematic, single-page scrolling structure to create a narrative user flow. It starts with a high-level introduction (Hero), explains the core relationship (Synergy), details a key application (Solving the Black Box), explores real-world impact (Case Studies), envisions the future (Agent Economy & Governance), and ends with a pragmatic summary (Challenges & Outlook). This structure is chosen over a direct report-to-page mapping because it guides the user through the concepts logically, from foundational to forward-looking, enhancing comprehension and engagement. A sticky navigation bar allows for both linear scrolling and direct access to topics. -->
+    <!-- Application Structure Plan: The application uses a thematic, single-page scrolling structure to create a narrative user flow. It starts with a high-level introduction (Hero), explains the core relationship (Synergy), details a key application (Solving the Black Box), explores real-world impact (Case Studies), envisions the future (Agent Economy), expands on government and legal applications (Governance & Law), and includes a section for specific visions (Future Visions) before concluding with a pragmatic summary (Challenges & Outlook). This structure is chosen over a direct report-to-page mapping because it guides the user through the concepts logically, from foundational to forward-looking, enhancing comprehension and engagement. A sticky navigation bar allows for both linear scrolling and direct access to topics. -->
     <!-- Visualization & Content Choices: 
         1. Synergy Section: Report Info -> AI/Blockchain weaknesses & strengths. Goal -> Compare. Viz -> Interactive two-column layout with clickable cards. Interaction -> Click to reveal details. Justification -> More engaging than a static table, encourages exploration. Method -> HTML/CSS/JS.
         2. Black Box Section: Report Info -> Data provenance, model integrity, decision traceability. Goal -> Organize/Explain a process. Viz -> A process flow diagram. Interaction -> Hovering over steps reveals explanatory tooltips. Justification -> Visually represents a complex workflow, making it easier to understand than dense text. Method -> HTML/CSS with Tailwind.
-        3. Challenges Section: Report Info -> Scalability, energy, complexity, privacy. Goal -> Compare/Inform. Viz -> Horizontal Bar Chart. Interaction -> Clicking a bar updates a detailed text view below. Justification -> Provides a quick visual comparison of challenges while allowing a deep dive into the specifics, making the data more digestible. Library -> Chart.js (Canvas).
-        4. Case Studies: Report Info -> Xbox, BurstIQ, IBM examples. Goal -> Inform. Viz -> Tabbed content switcher. Interaction -> Click tabs to switch content. Justification -> Organizes distinct examples cleanly without cluttering the page. Method -> HTML/CSS/JS.
+        3. Case Studies: Report Info -> Xbox, BurstIQ, IBM examples. Goal -> Inform. Viz -> Tabbed content switcher. Interaction -> Click tabs to switch content. Justification -> Organizes distinct examples cleanly without cluttering the page. Method -> HTML/CSS/JS.
+        4. Governance & Law Section: Report Info -> AI in law, government automation. Goal -> Inform/Organize. Viz -> A grid of cards. Interaction -> Clickable cards with detailed information. Justification -> Presents a clear overview of different applications in a structured way. Method -> HTML/CSS/JS.
+        5. Future Visions Section: Report Info -> Near Protocol's vision for AI. Goal -> Inform. Viz -> Text block. Interaction -> None. Justification -> Provides specific context without unnecessary visual complexity. Method -> HTML/CSS.
+        6. Challenges Section: Report Info -> Scalability, energy, complexity, privacy. Goal -> Compare/Inform. Viz -> Horizontal Bar Chart. Interaction -> Clicking a bar updates a detailed text view below. Justification -> Provides a quick visual comparison of challenges while allowing a deep dive into the specifics, making the data more digestible. Library -> Chart.js (Canvas).
     -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
@@ -99,7 +101,8 @@
                 <a href="#synergy" class="nav-link text-gray-600">Synergy</a>
                 <a href="#verifiability" class="nav-link text-gray-600">Verifiability</a>
                 <a href="#economy" class="nav-link text-gray-600">Economy</a>
-                <a href="#governance" class="nav-link text-gray-600">Governance</a>
+                <a href="#governance-law" class="nav-link text-gray-600">Governance & Law</a>
+                <a href="#future-visions" class="nav-link text-gray-600">Future Visions</a>
                 <a href="#challenges" class="nav-link text-gray-600">Challenges</a>
             </div>
             <div class="md:hidden">
@@ -112,7 +115,8 @@
             <a href="#synergy" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Synergy</a>
             <a href="#verifiability" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Verifiability</a>
             <a href="#economy" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Economy</a>
-            <a href="#governance" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Governance</a>
+            <a href="#governance-law" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Governance & Law</a>
+            <a href="#future-visions" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Future Visions</a>
             <a href="#challenges" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Challenges</a>
         </div>
     </header>
@@ -281,27 +285,62 @@
                 </div>
             </div>
         </section>
-
-        <section id="governance" class="py-20">
+        
+        <section id="governance-law" class="py-20">
             <div class="container mx-auto px-6">
                  <div class="text-center mb-12">
-                    <h3 class="text-3xl md:text-4xl font-bold text-gray-800">Future of Governance</h3>
-                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">As autonomous agents grow more sophisticated, traditional top-down regulation falls short. Decentralized Autonomous Organizations (DAOs) offer a scalable and participatory model for AI oversight.</p>
+                    <h3 class="text-3xl md:text-4xl font-bold text-gray-800">Governance, Law & Government Automation</h3>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">As autonomous agents grow more sophisticated, traditional regulation falls short. This synergy offers a new path for verifiable law and automated governance.</p>
                 </div>
-                <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg flex flex-col md:flex-row items-center gap-8">
-                    <div class="text-center md:text-left">
-                        <span class="text-6xl">&#9995;</span>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <span class="text-5xl mb-4 block">&#9995;</span>
+                        <h4 class="font-bold text-xl mb-2">Decentralized Governance</h4>
+                        <p class="text-gray-600">DAOs empower stakeholders—developers, ethicists, and users—to collectively make decisions about an AI's rules and behavior, creating a transparent, continuous-compliance model.</p>
                     </div>
-                    <div>
-                        <h4 class="text-2xl font-bold mb-4">Governance by Stakeholders</h4>
-                        <p class="text-gray-600">DAOs empower a diverse group of stakeholders—developers, ethicists, users, and regulators—to collectively make decisions about an AI's rules and behavior. This is managed transparently on a blockchain, using voting mechanisms and reputation scores to ensure accountability.</p>
-                        <p class="mt-4 text-gray-600">This creates a dynamic, continuous-compliance model where AI can be both the subject of governance and a tool to make governance more efficient, leading to a more adaptive and responsive oversight system.</p>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <span class="text-5xl mb-4 block">&#9881;&#65039;</span>
+                        <h4 class="font-bold text-xl mb-2">Algorithmic Law</h4>
+                        <p class="text-gray-600">Smart contracts can encode and automate legal agreements, enabling provably fair and unbiased execution of contracts without human intervention, from property deeds to financial settlements.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <span class="text-5xl mb-4 block">&#128080;</span>
+                        <h4 class="font-bold text-xl mb-2">Immutable Evidence</h4>
+                        <p class="text-gray-600">Data logged on a blockchain provides an irrefutable record of events, which can serve as tamper-proof digital evidence in legal proceedings, streamlining court processes.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <span class="text-5xl mb-4 block">&#128218;</span>
+                        <h4 class="font-bold text-xl mb-2">Automated Public Services</h4>
+                        <p class="text-gray-600">AI agents, governed by a DAO-like structure, can automate the allocation of public funds or the distribution of social services based on verifiable, on-chain criteria, increasing efficiency and reducing corruption.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <span class="text-5xl mb-4 block">&#127757;</span>
+                        <h4 class="font-bold text-xl mb-2">DAO as a Government</h4>
+                        <p class="text-gray-600">In the long term, entire governmental processes could be managed by sophisticated, verifiable AI-blockchain systems, creating what some call a "Decentralized Autonomous Government" (DAG) where policies are enforced with mathematical certainty.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <span class="text-5xl mb-4 block">&#128204;</span>
+                        <h4 class="font-bold text-xl mb-2">Ethical Oversight</h4>
+                        <p class="text-gray-600">Blockchain's auditability ensures that the ethical guardrails of AI systems are transparently enforced. Any changes to a model's ethical rules must be logged and approved by a consensus of stakeholders.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="challenges" class="py-20 bg-white">
+        <section id="future-visions" class="py-20 bg-white">
+            <div class="container mx-auto px-6 max-w-4xl">
+                 <div class="text-center mb-12">
+                    <h3 class="text-3xl md:text-4xl font-bold text-gray-800">Future Visions: The Near Protocol's Perspective</h3>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Near Protocol envisions a future where AI is decentralized and benefits all. They are building infrastructure to make this vision a reality.</p>
+                </div>
+                <div class="bg-gray-50 p-8 rounded-lg shadow-inner">
+                    <p class="text-gray-600 mb-4">Near's vision centers on the concept of **"Decentralized AI,"** which moves control of AI models and their data from centralized tech companies to the public. They believe AI should be a shared public utility, not a proprietary tool.</p>
+                    <p class="text-gray-600">This involves creating on-chain tools for AI development, providing verifiable proof of a model's integrity and training data. Their work with the **AI Alliance** focuses on building an open-source, permissionless ecosystem for AI agents. Near provides the **on-chain identity, payment layer, and secure data storage** that is essential for this agent economy to thrive, enabling AI models to interact, transact, and earn revenue securely and transparently without needing a human intermediary. Their key differentiator is making this infrastructure user-friendly and highly scalable, bringing the vision of a shared, autonomous agent economy closer to reality.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="challenges" class="py-20">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
                     <h3 class="text-3xl md:text-4xl font-bold text-gray-800">Challenges & Strategic Outlook</h3>
