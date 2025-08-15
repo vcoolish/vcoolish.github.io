@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Convergence of AI & Blockchain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The application uses a thematic, single-page scrolling structure to create a narrative user flow. It starts with a high-level introduction (Hero), explains the core relationship (Synergy), details a key application (Solving the Black Box), explores real-world impact (Case Studies), envisions the future (Agent Economy & Governance), and ends with a pragmatic summary (Challenges & Outlook). This structure is chosen over a direct report-to-page mapping because it guides the user through the concepts logically, from foundational to forward-looking, enhancing comprehension and engagement. A sticky navigation bar allows for both linear scrolling and direct access to topics. -->
+    <!-- Visualization & Content Choices: 
+        1. Synergy Section: Report Info -> AI/Blockchain weaknesses & strengths. Goal -> Compare. Viz -> Interactive two-column layout with clickable cards. Interaction -> Click to reveal details. Justification -> More engaging than a static table, encourages exploration. Method -> HTML/CSS/JS.
+        2. Black Box Section: Report Info -> Data provenance, model integrity, decision traceability. Goal -> Organize/Explain a process. Viz -> A process flow diagram. Interaction -> Hovering over steps reveals explanatory tooltips. Justification -> Visually represents a complex workflow, making it easier to understand than dense text. Method -> HTML/CSS with Tailwind.
+        3. Challenges Section: Report Info -> Scalability, energy, complexity, privacy. Goal -> Compare/Inform. Viz -> Horizontal Bar Chart. Interaction -> Clicking a bar updates a detailed text view below. Justification -> Provides a quick visual comparison of challenges while allowing a deep dive into the specifics, making the data more digestible. Library -> Chart.js (Canvas).
+        4. Case Studies: Report Info -> Xbox, BurstIQ, IBM examples. Goal -> Inform. Viz -> Tabbed content switcher. Interaction -> Click tabs to switch content. Justification -> Organizes distinct examples cleanly without cluttering the page. Method -> HTML/CSS/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #2c3e50;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #4a90e2;
+        }
+        .card-flip {
+            perspective: 1000px;
+        }
+        .card-flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-flip:hover .card-flip-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+            font-size: 0.875rem;
+            text-align: left;
+            justify-content: flex-start;
+        }
+        .tab-active {
+            border-color: #4a90e2;
+            color: #4a90e2;
+            font-weight: 600;
+        }
+        .process-step {
+            position: relative;
+        }
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .process-step:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800">AI + Blockchain</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#synergy" class="nav-link text-gray-600">Synergy</a>
+                <a href="#verifiability" class="nav-link text-gray-600">Verifiability</a>
+                <a href="#economy" class="nav-link text-gray-600">Economy</a>
+                <a href="#governance" class="nav-link text-gray-600">Governance</a>
+                <a href="#challenges" class="nav-link text-gray-600">Challenges</a>
+            </div>
+            <div class="md:hidden">
+                <button id="menu-btn" class="text-gray-600 focus:outline-none">
+                    <span class="text-2xl">&#9776;</span>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#synergy" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Synergy</a>
+            <a href="#verifiability" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Verifiability</a>
+            <a href="#economy" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Economy</a>
+            <a href="#governance" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Governance</a>
+            <a href="#challenges" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Challenges</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="py-20 md:py-32 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl md:text-6xl font-bold text-gray-800 leading-tight">A New Paradigm of Trust</h2>
+                <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                    The convergence of Artificial Intelligence and Blockchain is creating a new architecture for digital systems—one that is not just intelligent and efficient, but also provably transparent, ethical, and accountable.
+                </p>
+                <a href="#synergy" class="mt-8 inline-block bg-[#4a90e2] text-white font-semibold py-3 px-8 rounded-lg shadow-lg hover:bg-blue-600 transition-colors duration-300">Explore the Synergy</a>
+            </div>
+        </section>
+
+        <section id="synergy" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl md:text-4xl font-bold text-gray-800">Foundational Synergy</h3>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">AI and Blockchain possess individual limitations, but their integration creates a symbiotic relationship that addresses their core weaknesses. Explore how each technology enhances the other by hovering over the cards below.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 md:gap-12">
+                    <div class="bg-white p-8 rounded-lg shadow-lg">
+                        <h4 class="text-2xl font-bold text-center mb-6 text-gray-800">Blockchain Enhancing AI</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="card-flip h-48">
+                                <div class="card-flip-inner">
+                                    <div class="card-front bg-blue-100">
+                                        <span class="text-4xl mb-2">&#128274;</span>
+                                        <h5 class="font-semibold">Data Integrity</h5>
+                                    </div>
+                                    <div class="card-back bg-blue-200">
+                                        <p>Provides an immutable ledger for data provenance, ensuring the integrity of AI training data and preventing tampering that leads to biased or harmful outcomes.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-flip h-48">
+                                <div class="card-flip-inner">
+                                    <div class="card-front bg-blue-100">
+                                        <span class="text-4xl mb-2">&#128269;</span>
+                                        <h5 class="font-semibold">Decision Audibility</h5>
+                                    </div>
+                                    <div class="card-back bg-blue-200">
+                                        <p>Logs AI decisions, inputs, and model updates on a transparent, tamper-proof ledger, solving the "black box" problem by creating a verifiable audit trail for regulators.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-lg">
+                        <h4 class="text-2xl font-bold text-center mb-6 text-gray-800">AI Enhancing Blockchain</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="card-flip h-48">
+                                <div class="card-flip-inner">
+                                    <div class="card-front bg-green-100">
+                                        <span class="text-4xl mb-2">&#128640;</span>
+                                        <h5 class="font-semibold">Scalability</h5>
+                                    </div>
+                                    <div class="card-back bg-green-200">
+                                        <p>Optimizes consensus mechanisms and analyzes transaction patterns to predict peak usage, dynamically allocating resources to reduce latency and network congestion.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-flip h-48">
+                                <div class="card-flip-inner">
+                                    <div class="card-front bg-green-100">
+                                        <span class="text-4xl mb-2">&#128110;</span>
+                                        <h5 class="font-semibold">Security</h5>
+                                    </div>
+                                    <div class="card-back bg-green-200">
+                                        <p>Continuously monitors transactions to identify and flag anomalies or fraudulent patterns in real-time, enhancing the overall security of the blockchain network.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="verifiability" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl md:text-4xl font-bold text-gray-800">Solving the AI "Black Box"</h3>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Blockchain provides a framework for provable verification, moving beyond simple explanation to create a transparent and accountable audit trail for AI systems. Hover over the steps to see how it works.</p>
+                </div>
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-4">
+                    <div class="process-step text-center">
+                        <div class="bg-gray-200 rounded-full w-24 h-24 flex items-center justify-center text-3xl mx-auto">&#128193;</div>
+                        <p class="mt-2 font-semibold">Data Provenance</p>
+                        <div class="tooltip absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded py-2 px-3 z-10 -ml-32 left-1/2">
+                            An immutable ledger stores metadata of data's origin and modifications, ensuring the integrity and authenticity of training data.
+                        </div>
+                    </div>
+                    <div class="text-gray-400 text-4xl hidden md:block">&rarr;</div>
+                    <div class="text-gray-400 text-4xl rotate-90 md:hidden">&darr;</div>
+                    <div class="process-step text-center">
+                        <div class="bg-gray-200 rounded-full w-24 h-24 flex items-center justify-center text-3xl mx-auto">&#129518;</div>
+                        <p class="mt-2 font-semibold">Model Integrity</p>
+                        <div class="tooltip absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded py-2 px-3 z-10 -ml-32 left-1/2">
+                            Hashes of model parameters and versions are logged on-chain, creating an auditable history that prevents unauthorized tampering.
+                        </div>
+                    </div>
+                    <div class="text-gray-400 text-4xl hidden md:block">&rarr;</div>
+                    <div class="text-gray-400 text-4xl rotate-90 md:hidden">&darr;</div>
+                    <div class="process-step text-center">
+                        <div class="bg-gray-200 rounded-full w-24 h-24 flex items-center justify-center text-3xl mx-auto">&#128100;</div>
+                        <p class="mt-2 font-semibold">Decision Traceability</p>
+                        <div class="tooltip absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded py-2 px-3 z-10 -ml-32 left-1/2">
+                            Inputs, model IDs, and outputs of AI decisions are logged on a tamper-proof ledger, making the decision-making process transparent.
+                        </div>
+                    </div>
+                     <div class="text-gray-400 text-4xl hidden md:block">&rarr;</div>
+                    <div class="text-gray-400 text-4xl rotate-90 md:hidden">&darr;</div>
+                    <div class="process-step text-center">
+                        <div class="bg-blue-500 text-white rounded-full w-24 h-24 flex items-center justify-center text-3xl mx-auto">&#128270;</div>
+                        <p class="mt-2 font-semibold">Verifiable Output</p>
+                        <div class="tooltip absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded py-2 px-3 z-10 -ml-32 left-1/2">
+                            The final result is a cryptographically verifiable audit trail, simplifying compliance and fostering public trust in automated decisions.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="case-studies" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl md:text-4xl font-bold text-gray-800">Real-World Impact</h3>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">The theoretical benefits are already being demonstrated in real-world applications, creating efficiency and trust in complex ecosystems. Select a case study to learn more.</p>
+                </div>
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex justify-center border-b border-gray-300 mb-8">
+                        <button data-tab="xbox" class="tab-btn tab-active py-2 px-6 border-b-2">Xbox Royalties</button>
+                        <button data-tab="health" class="tab-btn py-2 px-6 border-b-2 border-transparent">Healthcare</button>
+                        <button data-tab="food" class="tab-btn py-2 px-6 border-b-2 border-transparent">Food Supply</button>
+                    </div>
+                    <div id="case-study-content">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="economy" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl md:text-4xl font-bold text-gray-800">The AI Agent Economy</h3>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">The next evolution is the rise of autonomous agents that can transact without human input. Blockchain provides the critical infrastructure for this new AI-to-AI economy.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8 text-center">
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <span class="text-5xl">&#128181;</span>
+                        <h4 class="font-bold text-xl mt-4 mb-2">Cryptographic Identity</h4>
+                        <p class="text-gray-600">Blockchain gives every AI agent a universal identity—a wallet address—allowing it to hold and transact funds independently, freeing it from traditional financial systems.</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <span class="text-5xl">&#129309;</span>
+                        <h4 class="font-bold text-xl mt-4 mb-2">Autonomous Agreements</h4>
+                        <p class="text-gray-600">Smart contracts enable agents to automatically execute transactions and enforce agreements, facilitating everything from self-driving taxis paying for their own fuel to AI models paying for data.</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <span class="text-5xl">&#127760;</span>
+                        <h4 class="font-bold text-xl mt-4 mb-2">Decentralized Marketplaces</h4>
+                        <p class="text-gray-600">Platforms like the Artificial Superintelligence (ASI) Alliance are creating open ecosystems for AI agents to discover each other, collaborate, and exchange services, challenging centralized tech giants.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="governance" class="py-20">
+            <div class="container mx-auto px-6">
+                 <div class="text-center mb-12">
+                    <h3 class="text-3xl md:text-4xl font-bold text-gray-800">Future of Governance</h3>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">As autonomous agents grow more sophisticated, traditional top-down regulation falls short. Decentralized Autonomous Organizations (DAOs) offer a scalable and participatory model for AI oversight.</p>
+                </div>
+                <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg flex flex-col md:flex-row items-center gap-8">
+                    <div class="text-center md:text-left">
+                        <span class="text-6xl">&#9995;</span>
+                    </div>
+                    <div>
+                        <h4 class="text-2xl font-bold mb-4">Governance by Stakeholders</h4>
+                        <p class="text-gray-600">DAOs empower a diverse group of stakeholders—developers, ethicists, users, and regulators—to collectively make decisions about an AI's rules and behavior. This is managed transparently on a blockchain, using voting mechanisms and reputation scores to ensure accountability.</p>
+                        <p class="mt-4 text-gray-600">This creates a dynamic, continuous-compliance model where AI can be both the subject of governance and a tool to make governance more efficient, leading to a more adaptive and responsive oversight system.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="challenges" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl md:text-4xl font-bold text-gray-800">Challenges & Strategic Outlook</h3>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Despite its potential, the convergence of AI and Blockchain faces significant hurdles. Click on a challenge below to explore its implications and potential solutions.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="challengesChart"></canvas>
+                </div>
+                <div id="challenge-details" class="max-w-3xl mx-auto mt-8 bg-gray-50 p-6 rounded-lg shadow-inner min-h-[150px]">
+                    <p class="text-gray-500 text-center">Select a bar on the chart to see details.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 AI+Blockchain Interactive Report. All rights reserved.</p>
+            <p class="text-sm text-gray-400 mt-2">This application is an interactive synthesis of the research report on AI and Blockchain convergence.</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    menuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    const navLinks = document.querySelectorAll('#mobile-menu a, #header nav a');
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+    });
+
+    const caseStudiesData = {
+        xbox: {
+            title: "Microsoft Xbox/EY: Royalty Management",
+            problem: "Inefficient, manual, and fraud-prone royalty payments to partners.",
+            aiRole: "Analyzes transaction data to detect fraud and anomalies in real-time.",
+            blockchainRole: "Provides a tamper-proof ledger and smart contracts for automated, transparent payments.",
+            outcome: "Reduced royalty payment time from 45 days to just 4 minutes, drastically improving efficiency."
+        },
+        health: {
+            title: "BurstIQ: Secure Health Wallet",
+            problem: "Fragmented, insecure patient data that is difficult to share while protecting privacy.",
+            aiRole: "Analyzes aggregated health data for advanced research, diagnoses, and personalized treatment plans.",
+            blockchainRole: "Creates a secure, immutable ledger for patient data, enabling dynamic consent and privacy management.",
+            outcome: "Enables secure data sharing for research while giving patients full control over their sensitive information."
+        },
+        food: {
+            title: "IBM Food Trust/Walmart: Supply Chain",
+            problem: "Opaque, paper-based supply chain with slow, costly product recalls and fraud.",
+            aiRole: "Analyzes supply chain data to forecast demand and detect anomalies.",
+            blockchainRole: "Creates a shared, immutable ledger for end-to-end traceability and product provenance.",
+            outcome: "Reduced food tracing time from days or weeks to mere seconds, improving food safety and efficiency."
+        }
+    };
+
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const caseStudyContent = document.getElementById('case-study-content');
+
+    function renderCaseStudy(tab) {
+        const data = caseStudiesData[tab];
+        caseStudyContent.innerHTML = `
+            <div class="bg-white p-8 rounded-lg shadow-lg transition-opacity duration-500 animate-fade-in">
+                <h4 class="text-2xl font-bold mb-4 text-gray-800">${data.title}</h4>
+                <div class="space-y-4 text-gray-600">
+                    <p><strong class="font-semibold text-gray-700">Problem:</strong> ${data.problem}</p>
+                    <p><strong class="font-semibold text-gray-700">AI's Role:</strong> ${data.aiRole}</p>
+                    <p><strong class="font-semibold text-gray-700">Blockchain's Role:</strong> ${data.blockchainRole}</p>
+                    <p class="mt-4 text-lg font-semibold text-[#4a90e2]">Key Outcome: ${data.outcome}</p>
+                </div>
+            </div>
+            <style>.animate-fade-in { animation: fadeIn 0.5s; } @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }</style>
+        `;
+    }
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            tabButtons.forEach(btn => {
+                btn.classList.remove('tab-active');
+            });
+            button.classList.add('tab-active');
+            renderCaseStudy(button.dataset.tab);
+        });
+    });
+
+    renderCaseStudy('xbox');
+
+    const challengesData = [
+        {
+            label: 'Scalability',
+            description: "Blockchain's low transaction throughput and high storage demands struggle with AI's massive data volume.",
+            implication: "Limits real-time applications, leading to network congestion and high fees.",
+            solution: "AI-driven optimization of consensus mechanisms, sharding, and Layer 2 solutions."
+        },
+        {
+            label: 'Energy Consumption',
+            description: "Proof of Work consensus mechanisms and large-scale AI training are computationally and energy-intensive.",
+            implication: "Raises significant environmental concerns and increases operational costs.",
+            solution: "Transition to energy-efficient consensus like Proof of Stake (PoS) and use of decentralized compute marketplaces."
+        },
+        {
+            label: 'Integration Complexity',
+            description: "Merging two distinct and complex technologies is technically difficult, costly, and time-consuming.",
+            implication: "Slows adoption and requires significant investment in a highly skilled workforce.",
+            solution: "Development of modular frameworks, standardized APIs, and strategic partnerships like the ASI Alliance."
+        },
+        {
+            label: 'Privacy vs. Transparency',
+            description: "Blockchain's inherent transparency conflicts with AI's common need for sensitive or proprietary data.",
+            implication: "Risks legal violations (e.g., GDPR) and the exposure of valuable trade secrets.",
+            solution: "Use of cryptographic hashing, Zero-Knowledge Proofs (ZKPs), and privacy-preserving models like federated learning."
+        }
+    ];
+
+    const ctx = document.getElementById('challengesChart').getContext('2d');
+    const challengesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: challengesData.map(d => d.label),
+            datasets: [{
+                label: 'Challenge Impact',
+                data: [90, 80, 75, 85],
+                backgroundColor: 'rgba(74, 144, 226, 0.6)',
+                borderColor: 'rgba(74, 144, 226, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    display: false,
+                },
+                y: {
+                    ticks: {
+                        font: {
+                            size: 14,
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: false
+                }
+            },
+            onClick: (event, elements) => {
+                if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const data = challengesData[index];
+                    const detailsDiv = document.getElementById('challenge-details');
+                    detailsDiv.innerHTML = `
+                        <h4 class="text-xl font-bold mb-2 text-gray-800">${data.label}</h4>
+                        <p class="mb-2"><strong class="font-semibold">Description:</strong> ${data.description}</p>
+                        <p class="mb-2"><strong class="font-semibold">Implication:</strong> ${data.implication}</p>
+                        <p><strong class="font-semibold text-green-600">Solution:</strong> ${data.solution}</p>
+                    `;
+                }
+            }
+        }
+    });
+});
+</script>
+</body>
+</html>
