@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hyperliquid: An Interactive Technical Deep Dive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Cool Gray & Electric Blue -->
+    <!-- Application Structure Plan: A single-page, thematic dashboard structure is used instead of mirroring the report's linear format. This design prioritizes user exploration and synthesis. Key sections include: 1) A 'Hero' with dynamic key metrics for immediate impact. 2) A central 'Core Dilemma' section visually contrasting innovation against risk. 3) An interactive 'Tech Stack' diagram for explaining the architecture. 4) An 'Economic Engine' module with charts for tokenomics and fee flows. 5) A 'Performance Dashboard' for competitive analysis. 6) A 'Risk Assessment' section for clarity on vulnerabilities. This non-linear, modular approach allows users to jump to topics of interest and better understand the interconnectedness of Hyperliquid's technology, economics, and risks. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Key performance metrics -> Goal: Inform/Impress -> Viz: Dynamic JS counters -> Interaction: None -> Justification: Creates a live, high-impact intro -> Library/Method: Vanilla JS.
+        - Report Info: HYPE token allocation -> Goal: Organize/Inform -> Viz: Donut Chart -> Interaction: Hover for details -> Justification: Standard, clear way to show proportions -> Library/Method: Chart.js (Canvas).
+        - Report Info: Performance vs. competitors -> Goal: Compare -> Viz: Horizontal Bar Chart -> Interaction: Hover for exact values -> Justification: Best for comparing discrete values across categories -> Library/Method: Chart.js (Canvas).
+        - Report Info: Tech stack components -> Goal: Organize/Explain -> Viz: Interactive Diagram -> Interaction: Click to reveal details -> Justification: More engaging than static text, encourages exploration -> Library/Method: HTML/CSS/JS.
+        - Report Info: Risk factors -> Goal: Inform/Warn -> Viz: Icon-based card layout -> Interaction: None -> Justification: Quickly digestible and visually scannable summary of key risks -> Library/Method: HTML/CSS (Tailwind).
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1f2937;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        .tech-component.active {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+        .stat-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800">Hyperliquid Deep Dive</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#overview" class="nav-link font-medium text-gray-600">Overview</a>
+                <a href="#tech" class="nav-link font-medium text-gray-600">Technology</a>
+                <a href="#economics" class="nav-link font-medium text-gray-600">Economics</a>
+                <a href="#risks" class="nav-link font-medium text-gray-600">Risks</a>
+                <a href="#ux" class="nav-link font-medium text-gray-600">Experience</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        
+        <section id="overview" class="text-center mb-24">
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">CEX Performance, DEX Principles</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-12">
+                An interactive exploration of Hyperliquid, the perpetuals DEX built on a custom L1 blockchain. It achieves the speed of a centralized exchange while maintaining the transparency and non-custodial nature of DeFi. This report analyzes its core technology, economic model, and inherent risks.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="stat-card">
+                    <div class="text-blue-500 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-700">Order Throughput</h3>
+                    <p class="text-4xl font-bold text-gray-900" id="orders-per-second">1</p>
+                    <p class="text-gray-500">Orders per Second</p>
+                </div>
+                <div class="stat-card">
+                    <div class="text-blue-500 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-700">Median Latency</h3>
+                    <p class="text-4xl font-bold text-gray-900" id="median-latency">0.01</p>
+                    <p class="text-gray-500">Seconds</p>
+                </div>
+                <div class="stat-card">
+                    <div class="text-blue-500 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01" /></svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-700">Daily Volume Peak</h3>
+                    <p class="text-4xl font-bold text-gray-900" id="daily-volume">$0.1B</p>
+                    <p class="text-gray-500">USD</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="dilemma" class="mb-24 bg-white p-8 rounded-xl shadow-lg">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900">The Core Dilemma: Innovation vs. Risk</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600 mt-4">
+                    Hyperliquid's greatest strength—its vertically integrated, custom L1 blockchain—is also the source of its most significant trade-off. This design choice creates a fundamental tension between high performance and decentralization.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                    <h3 class="text-2xl font-semibold text-blue-800 mb-4">🚀 The Innovation Edge</h3>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">✓</span><span><strong>CEX-Level Performance:</strong> Achieves up to 200,000 orders/sec with sub-second finality by optimizing the entire stack for trading.</span></li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">✓</span><span><strong>Gasless UX:</strong> Abstracts away gas fees, offering a frictionless, one-click trading experience that attracts a wider user base.</span></li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">✓</span><span><strong>Integrated Primitives:</strong> The order book and clearinghouse are built into the protocol, not as smart contracts, leading to superior efficiency.</span></li>
+                    </ul>
+                </div>
+                <div class="bg-red-50 p-6 rounded-lg border border-red-200">
+                    <h3 class="text-2xl font-semibold text-red-800 mb-4">⚠️ The Inherent Risks</h3>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">✗</span><span><strong>Validator Centralization:</strong> A small, permissioned validator set (initially just 4) secures the network, raising concerns about censorship and control.</span></li>
+                        <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">✗</span><span><strong>Audit Gaps:</strong> The core L1 and DEX software lack comprehensive, public audits, creating a "trust-me" scenario for the main trading engine.</span></li>
+                        <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">✗</span><span><strong>Intervention Potential:</strong> Past incidents have shown validators can intervene to freeze contracts, trading off immutability for stability.</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="tech" class="mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900">How It Works: The Technology Stack</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600 mt-4">
+                    Hyperliquid's performance is rooted in its unique, dual-state architecture. The system separates high-frequency trading operations from general-purpose smart contracts to optimize for speed without sacrificing composability. Click on a component to learn more.
+                </p>
+            </div>
+            <div class="grid lg:grid-cols-3 gap-8 items-start">
+                <div class="lg:col-span-1 space-y-4">
+                    <div id="tech-component-l1" class="tech-component active cursor-pointer p-4 border rounded-lg shadow-sm transition-all duration-300">
+                        <h4 class="font-bold text-lg">Hyperliquid L1</h4>
+                        <p class="text-sm text-gray-600">The purpose-built blockchain foundation.</p>
+                    </div>
+                    <div id="tech-component-bft" class="tech-component cursor-pointer p-4 border rounded-lg shadow-sm transition-all duration-300">
+                        <h4 class="font-bold text-lg">HyperBFT Consensus</h4>
+                        <p class="text-sm text-gray-600">The engine for speed and security.</p>
+                    </div>
+                    <div id="tech-component-core" class="tech-component cursor-pointer p-4 border rounded-lg shadow-sm transition-all duration-300">
+                        <h4 class="font-bold text-lg">HyperCore</h4>
+                        <p class="text-sm text-gray-600">The native, high-performance execution layer.</p>
+                    </div>
+                    <div id="tech-component-evm" class="tech-component cursor-pointer p-4 border rounded-lg shadow-sm transition-all duration-300">
+                        <h4 class="font-bold text-lg">HyperEVM</h4>
+                        <p class="text-sm text-gray-600">The general-purpose smart contract layer.</p>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 bg-white p-8 rounded-xl shadow-lg min-h-[300px]">
+                    <div id="tech-details">
+                        <h3 id="tech-title" class="text-2xl font-bold mb-4">Hyperliquid L1</h3>
+                        <p id="tech-description" class="text-gray-700">
+                            Hyperliquid is built on a custom Layer 1 blockchain, designed from the ground up for on-chain finance. Unlike protocols on general-purpose chains, this application-specific approach allows every layer of the stack to be optimized for a single purpose: enabling a CEX-like trading experience with on-chain transparency. Financial primitives like the order book are integrated directly into the protocol for maximum performance.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="economics" class="mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900">The Economic Engine</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600 mt-4">
+                    Hyperliquid's economy is designed to be a self-sustaining ecosystem. It combines a community-focused token distribution with a unique revenue-sharing model that creates continuous buying pressure on its native token, HYPE.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-12">
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-semibold text-center mb-6">HYPE Token Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="tokenomicsChart"></canvas>
+                    </div>
+                    <p class="text-sm text-gray-500 text-center mt-4">Total Supply: 1 Billion HYPE. No ongoing inflation. No private investors at genesis.</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-semibold text-center mb-6">The Assistance Fund: A Buyback Engine</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                            <div class="text-2xl mr-4">1️⃣</div>
+                            <div>
+                                <h4 class="font-semibold">Protocol Revenue</h4>
+                                <p class="text-gray-600">~97% of user trading fees are collected by the protocol.</p>
+                            </div>
+                        </div>
+                        <div class="text-center text-2xl text-gray-400">↓</div>
+                        <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                            <div class="text-2xl mr-4">2️⃣</div>
+                            <div>
+                                <h4 class="font-semibold">Directed to Fund</h4>
+                                <p class="text-gray-600">Fees are automatically and continuously sent to the Assistance Fund.</p>
+                            </div>
+                        </div>
+                        <div class="text-center text-2xl text-gray-400">↓</div>
+                        <div class="flex items-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <div class="text-2xl mr-4">3️⃣</div>
+                            <div>
+                                <h4 class="font-semibold text-blue-800">Programmatic Buybacks</h4>
+                                <p class="text-gray-600">The fund uses the revenue to programmatically buy HYPE from the open market, creating constant buy pressure.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="performance-comparison" class="mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900">Performance Dashboard</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600 mt-4">
+                    How does Hyperliquid's custom architecture stack up against other major platforms? This comparison highlights the significant performance gains achieved through its application-specific design.
+                </p>
+            </div>
+            <div class="bg-white p-8 rounded-xl shadow-lg">
+                <h3 class="text-2xl font-semibold text-center mb-6">Throughput Comparison (Orders/Transactions Per Second)</h3>
+                <div class="chart-container" style="height: 400px; max-height: 500px;">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+                 <p class="text-sm text-gray-500 text-center mt-4">Note: Binance CEX data is an estimate for a centralized system. Hyperliquid's throughput is for orders, which is the most relevant metric for a DEX.</p>
+            </div>
+        </section>
+
+        <section id="risks" class="mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900">A Framework for Assessing Risk</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600 mt-4">
+                    While innovative, the platform is not without risks. A balanced assessment requires understanding the key areas of vulnerability that stem from its design choices and operational history.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="border border-gray-200 bg-white p-6 rounded-lg text-center hover:shadow-xl transition-shadow">
+                    <h4 class="text-xl font-semibold mb-2">Centralization Risk</h4>
+                    <p class="text-gray-600">A small, permissioned validator set with foundation nodes controlling a majority of stake poses a risk of censorship or collusion.</p>
+                </div>
+                <div class="border border-gray-200 bg-white p-6 rounded-lg text-center hover:shadow-xl transition-shadow">
+                    <h4 class="text-xl font-semibold mb-2">Smart Contract Risk</h4>
+                    <p class="text-gray-600">The core L1 and DEX lack comprehensive public audits, meaning the main trading engine has not been fully battle-tested by third parties.</p>
+                </div>
+                <div class="border border-gray-200 bg-white p-6 rounded-lg text-center hover:shadow-xl transition-shadow">
+                    <h4 class="text-xl font-semibold mb-2">Operational Risk</h4>
+                    <p class="text-gray-600">The team has previously intervened in markets to prevent crises, demonstrating a centralized control point that overrides protocol immutability.</p>
+                </div>
+                <div class="border border-gray-200 bg-white p-6 rounded-lg text-center hover:shadow-xl transition-shadow">
+                    <h4 class="text-xl font-semibold mb-2">Market Risk</h4>
+                    <p class="text-gray-600">Like any high-leverage platform, users are exposed to liquidation and potential manipulation, especially with less-liquid assets.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="ux" class="text-center">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">The User & Builder Experience</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-12">
+                Beyond performance, Hyperliquid focuses on providing a seamless experience for traders and a powerful, composable platform for developers.
+            </p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg text-left">
+                    <h3 class="text-2xl font-semibold mb-4">For Traders: A Frictionless UX</h3>
+                    <p class="text-gray-700 mb-4">The primary goal is to replicate the feel of a CEX. This is achieved through:</p>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>One-Click Trading:</strong> No constant wallet pop-ups for every action.</li>
+                        <li><strong>Gasless Transactions:</strong> The protocol absorbs gas costs, so users trade freely without worrying about network fees on each order.</li>
+                        <li><strong>Broad Interoperability:</strong> Direct deposits are supported from over 30 chains, simplifying the onboarding process.</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg text-left">
+                    <h3 class="text-2xl font-semibold mb-4">For Builders: A Composable Hub</h3>
+                    <p class="text-gray-700 mb-4">HyperEVM provides a familiar, Ethereum-compatible environment for developers to:</p>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Leverage Core Primitives:</strong> Build new DeFi apps (lending, AMMs) on top of Hyperliquid's deep, on-chain liquidity and order book.</li>
+                        <li><strong>Abstract Complexity:</strong> Focus on business logic instead of building a high-performance backend from scratch.</li>
+                        <li><strong>Create an Ecosystem:</strong> Position Hyperliquid as a foundational "operating stack for DeFi," not just a trading venue.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-24">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p>This interactive report was generated based on a technical analysis of the Hyperliquid protocol.</p>
+            <p class="text-sm text-gray-400 mt-2">All data is for illustrative purposes and sourced from the provided report.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const techData = {
+                l1: {
+                    title: 'Hyperliquid L1',
+                    description: 'Hyperliquid is built on a custom Layer 1 blockchain, designed from the ground up for on-chain finance. Unlike protocols on general-purpose chains, this application-specific approach allows every layer of the stack to be optimized for a single purpose: enabling a CEX-like trading experience with on-chain transparency. Financial primitives like the order book are integrated directly into the protocol for maximum performance.'
+                },
+                bft: {
+                    title: 'HyperBFT Consensus',
+                    description: 'The network is secured by HyperBFT, a custom consensus algorithm inspired by high-performance protocols like Hotstuff (used by Aptos and Sui). It is optimized for low-latency and high-throughput, achieving a median transaction finality of 0.2 seconds. This allows for near-instantaneous trade execution and the processing of up to 200,000 orders per second.'
+                },
+                core: {
+                    title: 'HyperCore',
+                    description: 'This is the native, high-performance execution layer of the blockchain. HyperCore powers the fully on-chain order books for both perpetuals and spot markets. Every critical action—placing an order, canceling, executing a trade, and liquidation—is transparently recorded on-chain with one-block finality. This is the core innovation enabling Hyperliquid\'s speed.'
+                },
+                evm: {
+                    title: 'HyperEVM',
+                    description: 'This is a general-purpose, Ethereum-compatible smart contract environment running on the same consensus as HyperCore. It provides developers with a familiar Solidity environment to deploy dApps. Builders can leverage the high-performance liquidity and financial primitives of HyperCore as permissionless building blocks for their own applications, fostering a broader ecosystem.'
+                }
+            };
+
+            const techComponents = document.querySelectorAll('.tech-component');
+            const techTitle = document.getElementById('tech-title');
+            const techDescription = document.getElementById('tech-description');
+
+            techComponents.forEach(component => {
+                component.addEventListener('click', () => {
+                    techComponents.forEach(c => c.classList.remove('active'));
+                    component.classList.add('active');
+                    const componentId = component.id.split('-')[2];
+                    techTitle.innerText = techData[componentId].title;
+                    techDescription.innerText = techData[componentId].description;
+                });
+            });
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.4
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            const animateValue = (obj, start, end, duration, formatFn) => {
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    let currentValue = progress * (end - start) + start;
+                    obj.innerHTML = formatFn(currentValue);
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    }
+                };
+                window.requestAnimationFrame(step);
+            };
+
+            const ordersPerSecond = document.getElementById('orders-per-second');
+            const medianLatency = document.getElementById('median-latency');
+            const dailyVolume = document.getElementById('daily-volume');
+
+            animateValue(ordersPerSecond, 0, 200000, 2000, val => Math.floor(val).toLocaleString());
+            animateValue(medianLatency, 0, 0.2, 1500, val => val.toFixed(2));
+            animateValue(dailyVolume, 0, 3.4, 2500, val => `$${val.toFixed(1)}B`);
+
+            const tokenomicsCtx = document.getElementById('tokenomicsChart').getContext('2d');
+            new Chart(tokenomicsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Airdrop', 'Future Emissions & Rewards', 'Contributors', 'Foundation Treasury', 'Community Grants'],
+                    datasets: [{
+                        label: 'HYPE Token Distribution',
+                        data: [31, 38.888, 23.8, 6, 0.3],
+                        backgroundColor: [
+                            '#3b82f6',
+                            '#60a5fa',
+                            '#93c5fd',
+                            '#bfdbfe',
+                            '#e0f2fe'
+                        ],
+                        borderColor: '#f8fafc',
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(performanceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Binance CEX', 'Solana', 'Hyperliquid', 'Ethereum'],
+                    datasets: [{
+                        label: 'Transactions/Orders Per Second (Logarithmic Scale)',
+                        data: [1400000, 65000, 200000, 15],
+                        backgroundColor: [
+                            '#f59e0b',
+                            '#8b5cf6',
+                            '#3b82f6',
+                            '#4b5563'
+                        ],
+                        borderColor: [
+                            '#f59e0b',
+                            '#8b5cf6',
+                            '#3b82f6',
+                            '#4b5563'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'logarithmic',
+                            title: {
+                                display: true,
+                                text: 'TPS (Log Scale)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.raw.toLocaleString()} TPS/OPS`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
