@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Chosen Palette: Warm Neutrals with Teal Accent -->
+    <!-- Application Structure Plan: Designed a 2-column SPA (sidebar nav, main content) to translate the report. This dashboard-style structure is superior to the linear slide-deck as it allows non-linear exploration. Users can jump between 'What', 'How', 'Who', and 'Why' (The Vision). Interactions include dynamic content swapping for navigation, tabs for sub-sections (Ecosystem), and toggle-able code snippets (Tech Deep Dive) to make abstract concepts tangible. -->
+    <!-- Visualization & Content Choices: 1. Problem: 'Traditional vs x402' 2-col HTML layout (Goal: Compare). 2. Handshake: HTML/CSS 'diagram' + JS-powered code-snippet toggles (Goal: Organize/Inform, Method: HTML/JS). 3. Facilitator: HTML/CSS diagram (Goal: Organize). 4. Security: 2-col HTML 'Advantages vs Considerations' (Goal: Compare). 5. Adoption Hype: '10k% Txn Increase' -> Chart.js Line Chart with mock data (Goal: Change/Inform, Method: Chart.js). All choices avoid SVG/Mermaid as required. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>x402 Protocol Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 48rem; /* max-w-2xl */
+            margin-left: auto;
+            margin-right: auto;
+            height: 24rem; /* h-96 */
+            max-height: 400px;
+        }
+        @media (min-width: 640px) {
+            .chart-container {
+                height: 20rem; /* sm:h-80 */
+            }
+        }
+        .nav-link.active {
+            background-color: #F0FDFA; /* teal-50 */
+            color: #0F766E; /* teal-700 */
+            font-weight: 600;
+        }
+        .tab-btn.active {
+            border-bottom-color: #0D9488; /* teal-600 */
+            color: #0D9488; /* teal-600 */
+            font-weight: 600;
+        }
+        .code-btn.active {
+            background-color: #0D9488; /* teal-600 */
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <header class="bg-white shadow-sm w-full">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <h1 class="text-3xl font-bold text-teal-700">x402 Protocol Explorer</h1>
+            <p class="text-lg text-gray-600">An interactive deep dive into the new standard for internet-native payments.</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+
+            <aside id="navigation" class="md:col-span-1 bg-white p-4 rounded-lg shadow-lg h-fit sticky top-8">
+                <nav>
+                    <ul class="space-y-2">
+                        <li>
+                            <button data-target="content-introduction" class="nav-link w-full text-left p-3 rounded-md font-medium text-gray-700 hover:bg-gray-100 hover:text-teal-600 transition-all active">
+                                Introduction
+                            </button>
+                        </li>
+                        <li>
+                            <button data-target="content-technical" class="nav-link w-full text-left p-3 rounded-md font-medium text-gray-700 hover:bg-gray-100 hover:text-teal-600 transition-all">
+                                Technical Deep Dive
+                            </button>
+                        </li>
+                        <li>
+                            <button data-target="content-architecture" class="nav-link w-full text-left p-3 rounded-md font-medium text-gray-700 hover:bg-gray-100 hover:text-teal-600 transition-all">
+                                Core Architecture
+                            </button>
+                        </li>
+                        <li>
+                            <button data-target="content-ecosystem" class="nav-link w-full text-left p-3 rounded-md font-medium text-gray-700 hover:bg-gray-100 hover:text-teal-600 transition-all">
+                                Ecosystem & Players
+                            </button>
+                        </li>
+                        <li>
+                            <button data-target="content-vision" class="nav-link w-full text-left p-3 rounded-md font-medium text-gray-700 hover:bg-gray-100 hover:text-teal-600 transition-all">
+                                The Vision
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <section id="content-area" class="md:col-span-3 min-h-[60vh]">
+
+                <div id="content-introduction" class="content-panel bg-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-2xl font-bold text-teal-700 mb-4">The Problem with Web Payments</h2>
+                    <p class="text-gray-700 mb-6">
+                        Welcome to the x402 Protocol Explorer. This application provides an interactive deep dive into the new standard for internet-native payments. Start here to understand the core problem x402 solves and its high-level solution. Today's web payments were designed for humans, creating significant barriers for automated systems like AI agents.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="border-2 border-red-200 bg-red-50 p-4 rounded-lg">
+                            <h3 class="text-xl font-semibold text-red-700 mb-3">Traditional Payments (The Friction)</h3>
+                            <ul class="list-disc list-outside space-y-2 pl-5 text-red-900">
+                                <li>
+                                    <strong class="font-medium">Account-Based:</strong> Requires user signup, logins, and session management.
+                                </li>
+                                <li>
+                                    <strong class="font-medium">Insecure Keys:</strong> Relies on long-lived API keys, which are a major security risk if stolen.
+                                </li>
+                                <li>
+                                    <strong class="font-medium">High Fees:</strong> Credit card processing fees (e.g., $0.30 + 3%) make micropayments impossible.
+                                </li>
+                                <li>
+                                    <strong class="font-medium">Manual:</strong> An AI agent cannot "enter a credit card" or "complete KYC."
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="border-2 border-teal-200 bg-teal-50 p-4 rounded-lg">
+                            <h3 class="text-xl font-semibold text-teal-700 mb-3">x402 Protocol (The Solution)</h3>
+                            <ul class="list-disc list-outside space-y-2 pl-5 text-teal-900">
+                                <li>
+                                    <strong class="font-medium">Stateless:</strong> Payment is made directly within the HTTP request. No accounts needed.
+                                </li>
+                                <li>
+                                    <strong class="font-medium">"Payment is Authentication":</strong> A valid payment *is* the authentication. No API keys.
+                                </li>
+                                <li>
+                                    <strong class="font-medium">Microtransactions:</strong> Uses low-cost stablecoins, enabling payments of fractions of a cent.
+                                </li>
+                                <li>
+                                    <strong class="font-medium">Automated:</strong> Designed for machines to programmatically pay other machines.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="content-technical" class="content-panel bg-white p-6 rounded-lg shadow-lg hidden">
+                    <h2 class="text-2xl font-bold text-teal-700 mb-4">Technical Deep Dive: The Handshake</h2>
+                    <p class="text-gray-700 mb-6">
+                        This section details the technical implementation of an x402 transaction. The protocol is a simple, elegant handshake built on standard HTTP. Explore the step-by-step flow and see interactive code examples of the communication between the client and server.
+                    </p>
+
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Protocol Flow Diagram</h3>
+                    <div class="flex flex-col space-y-4 md:space-y-0 md:flex-row md:space-x-4 md:items-center md:justify-between text-center">
+                        <div class="flex-1">
+                            <div class="p-4 bg-gray-100 rounded-lg shadow-sm">
+                                <span class="text-sm font-medium text-gray-500">Step 1: Client</span>
+                                <p class="font-semibold text-gray-800">Request Resource</p>
+                                <code class="text-xs text-teal-600">GET /api/data</code>
+                            </div>
+                        </div>
+                        <div class="text-2xl font-bold text-teal-600 transform md:rotate-0 rotate-90">→</div>
+                        <div class="flex-1">
+                            <div class="p-4 bg-red-100 rounded-lg shadow-sm">
+                                <span class="text-sm font-medium text-gray-500">Step 2: Server</span>
+                                <p class="font-semibold text-red-700">402 Response</p>
+                                <code class="text-xs text-teal-600">HTTP 402 + JSON</code>
+                            </div>
+                        </div>
+                        <div class="text-2xl font-bold text-teal-600 transform md:rotate-0 rotate-90">→</div>
+                        <div class="flex-1">
+                            <div class="p-4 bg-gray-100 rounded-lg shadow-sm">
+                                <span class="text-sm font-medium text-gray-500">Step 3: Client</span>
+                                <p class="font-semibold text-gray-800">Pay & Retry</p>
+                                <code class="text-xs text-teal-600">GET /api/data + X-PAYMENT</code>
+                            </div>
+                        </div>
+                        <div class="text-2xl font-bold text-teal-600 transform md:rotate-0 rotate-90">→</div>
+                        <div class="flex-1">
+                            <div class="p-4 bg-green-100 rounded-lg shadow-sm">
+                                <span class="text-sm font-medium text-gray-500">Step 4: Server</span>
+                                <p class="font-semibold text-green-700">Verify & Grant</p>
+                                <code class="text-xs text-teal-600">HTTP 200 OK</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-gray-800 mt-8 mb-4">Interactive Code Flow</h3>
+                    <p class="text-gray-700 mb-4">Click the steps below to see what the HTTP request and response look like at each stage.</p>
+                    <div id="code-flow-toggles" class="flex flex-wrap gap-2 mb-4">
+                        <button data-target="snippet-1" class="code-btn px-4 py-2 bg-gray-200 text-gray-800 rounded-md font-medium hover:bg-gray-300 transition-all active">1. Initial Request</button>
+                        <button data-target="snippet-2" class="code-btn px-4 py-2 bg-gray-200 text-gray-800 rounded-md font-medium hover:bg-gray-300 transition-all">2. 402 Response</button>
+                        <button data-target="snippet-3" class="code-btn px-4 py-2 bg-gray-200 text-gray-800 rounded-md font-medium hover:bg-gray-300 transition-all">3. Retry with Payment</button>
+                    </div>
+
+                    <div id="code-snippet-container" class="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto">
+                        <div id="snippet-1" class="code-snippet">
+<pre><code class="language-http">GET /api/premium-data HTTP/1.1
+Host: api.example.com
+User-Agent: MyAiAgent/1.0
+</code></pre>
+                        </div>
+                        <div id="snippet-2" class="code-snippet hidden">
+<pre><code class="language-http">HTTP/1.1 402 Payment Required
+Content-Type: application/json
+
+{
+  "maxAmountRequired": "0.10",
+  "resource": "/api/premium-data",
+  "payTo": "0xABCDEF123456...",
+  "asset": "0xA0b869...[USDC]",
+  "network": "base-mainnet"
+}
+</code></pre>
+                        </div>
+                        <div id="snippet-3" class="code-snippet hidden">
+<pre><code class="language-http">GET /api/premium-data HTTP/1.1
+Host: api.example.com
+User-Agent: MyAiAgent/1.0
+X-PAYMENT: <signed_payment_payload_string>
+</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="content-architecture" class="content-panel bg-white p-6 rounded-lg shadow-lg hidden">
+                    <h2 class="text-2xl font-bold text-teal-700 mb-4">Core Architecture</h2>
+                    <p class="text-gray-700 mb-6">
+                        Beyond the simple handshake, the x402 design includes key architectural components that make it practical and secure. Learn about the crucial role of the 'Facilitator' and the protocol's security model.
+                    </p>
+
+                    <div id="architecture-toggles" class="mb-4 border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-6">
+                            <button data-target="content-facilitator" class="tab-btn whitespace-nowrap pb-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium active">
+                                The Facilitator
+                            </button>
+                            <button data-target="content-security" class="tab-btn whitespace-nowrap pb-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium">
+                                Security Model
+                            </button>
+                        </nav>
+                    </div>
+
+                    <div id="architecture-content">
+                        <div id="content-facilitator" class="tab-content">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">The Role of the Facilitator</h3>
+                            <p class="text-gray-700 mb-4">
+                                The "Facilitator" is a key design choice that makes x402 easy to adopt. It's a trusted service that offloads all complex blockchain logic from the server (seller), which only needs to make a simple API call to verify a payment.
+                            </p>
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
+                                    <div class="p-4 bg-white rounded-lg shadow-md font-semibold text-lg">Client (Buyer)</div>
+                                    <div class="text-2xl font-bold text-teal-600 transform md:rotate-0 rotate-90">↔</div>
+                                    <div class="p-4 bg-white rounded-lg shadow-md font-semibold text-lg">Server (Seller)</div>
+                                </div>
+                                <div class="flex justify-center">
+                                    <div class="text-2xl font-bold text-teal-600 mt-4 md:mt-0 md:ml-40 transform rotate-90 md:rotate-0">|</div>
+                                </div>
+                                <div class="flex justify-center">
+                                    <div class="text-sm font-medium text-gray-500">Verifies with</div>
+                                </div>
+                                <div class="flex justify-center">
+                                    <div class="text-2xl font-bold text-teal-600 mb-4 md:mb-0 md:ml-40 transform rotate-90 md:rotate-0">|</div>
+                                </div>
+                                <div class="flex justify-center">
+                                    <div class="p-4 bg-teal-100 border-2 border-teal-300 rounded-lg shadow-md font-semibold text-lg text-teal-800">Facilitator (e.g., Coinbase CDP)</div>
+                                </div>
+                                <p class="text-gray-600 mt-4 italic">The Seller offloads all blockchain verification to the Facilitator.</p>
+                            </div>
+                        </div>
+                        
+                        <div id="content-security" class="tab-content hidden">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Security Model</h3>
+                            <p class="text-gray-700 mb-4">
+                                x402's design has unique security properties. It is still a very new protocol and should be used with care, but its model solves many traditional problems.
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="border border-green-300 bg-green-50 p-4 rounded-lg">
+                                    <h4 class="text-lg font-semibold text-green-800 mb-2">Advantages</h4>
+                                    <ul class="list-disc list-outside space-y-1 pl-5 text-green-900">
+                                        <li><strong>No Stored API Keys:</strong> Eliminates the risk of stolen keys, a primary attack vector.</li>
+                                        <li><strong>Non-Custodial:</strong> Client private keys are never exposed to the server.</li>
+                                        <li><strong>Replay Protection:</strong> Signed payments include a "nonce" (one-time number) to prevent reuse.</li>
+                                    </ul>
+                                </div>
+                                <div class="border border-yellow-300 bg-yellow-50 p-4 rounded-lg">
+                                    <h4 class="text-lg font-semibold text-yellow-800 mb-2">Considerations</h4>
+                                    <ul class="list-disc list-outside space-y-1 pl-5 text-yellow-900">
+                                        <li><strong>Protocol Maturity:</strong> x402 is very new (2025) and lacks widespread, formal security audits.</li>
+                                        <li><strong>Facilitator Trust:</strong> The seller must trust the facilitator to correctly verify payments.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="content-ecosystem" class="content-panel bg-white p-6 rounded-lg shadow-lg hidden">
+                    <h2 class="text-2xl font-bold text-teal-700 mb-4">Ecosystem & Key Players</h2>
+                    <p class="text-gray-700 mb-6">
+                        A protocol is only as strong as its ecosystem. This section explores the key companies and projects building, backing, and using x402. Use the tabs to navigate between the protocol's stewards, its major partners, and the projects driving its adoption.
+                    </p>
+
+                    <div id="ecosystem-tabs" class="mb-4 border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-6 overflow-x-auto">
+                            <button data-target="content-stewards" class="tab-btn whitespace-nowrap pb-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium active">
+                                Stewards
+                            </button>
+                            <button data-target="content-partners" class="tab-btn whitespace-nowrap pb-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium">
+                                Partners
+                            </button>
+                            <button data-target="content-adoption" class="tab-btn whitespace-nowrap pb-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium">
+                                Adoption & Hype
+                            </button>
+                        </nav>
+                    </div>
+
+                    <div id="ecosystem-content">
+                        <div id="content-stewards" class="tab-content">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Stewards: Coinbase & Cloudflare</h3>
+                            <p class="text-gray-700 mb-4">The protocol is authored and stewarded by two of the largest infrastructure companies on the web. They have co-founded the **x402 Foundation** to ensure it remains an open, neutral standard.</p>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="text-lg font-semibold text-teal-700">Coinbase</h4>
+                                    <p class="text-gray-600">The original **author** of the protocol. Coinbase provides the core developer tools, including the main **Facilitator** service on its Developer Platform (CDP) and the official **x402 SDK**.</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-teal-700">Cloudflare</h4>
+                                    <p class="text-gray-600">Co-founder of the foundation, Cloudflare is integrating x402 into its global network. They are also proposing a **"deferred payment scheme"** to batch-process payments for services like web crawling, rather than paying per-request.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="content-partners" class="tab-content hidden">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Major Partners: Google & Visa</h3>
+                            <p class="text-gray-700 mb-4">Adoption by major technology and financial players signals the protocol's potential to become a true web standard.</p>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="text-lg font-semibold text-teal-700">Google</h4>
+                                    <p class="text-gray-600">Google is integrating x402 as the official stablecoin payment extension for its own **Agent Payments Protocol (AP2)**. In this model, AP2 handles *authorization* (what an agent is *allowed* to buy) and x402 handles the *payment* itself.</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-teal-700">Visa</h4>
+                                    <p class="text-gray-600">Visa is backing the x402 Foundation and actively exploring agent-based payment models, lending its expertise from the traditional financial world to this new standard.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="content-adoption" class="tab-content hidden">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Adoption: The "Doers" vs. The "Hype"</h3>
+                            <p class="text-gray-700 mb-4">The protocol has seen two very different types of early adoption: legitimate builders creating new platforms, and speculators using the protocol as a new "launchpad."</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                <div class="border border-gray-300 bg-gray-50 p-4 rounded-lg">
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-2">The "Doers" (Builders)</h4>
+                                    <ul class="list-none space-y-2 text-gray-700">
+                                        <li><strong>Kite AI:</strong> Building a Layer-1 blockchain for the agentic internet with x402 natively integrated.</li>
+                                        <li><strong>Questflow:</strong> An orchestration layer for AI agents, using x402 to allow agents to pay each other for tasks.</li>
+                                    </ul>
+                                </div>
+                                <div class="border border-gray-300 bg-gray-50 p-4 rounded-lg">
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-2">The "Hype" (Speculators)</h4>
+                                    <p class="text-gray-700">The protocol has been used to launch speculative tokens (e.g., $PING, $BNKR). This drove a massive, headline-grabbing surge in transaction volume in late 2025.</p>
+                                </div>
+                            </div>
+
+                            <h4 class="text-lg font-semibold text-gray-800 mb-2 text-center">x402 On-Chain Transaction Volume (Illustrative)</h4>
+                            <p class="text-sm text-gray-600 text-center mb-4">The "hype" phase caused a dramatic, 10,000%+ spike in on-chain activity, bringing massive attention to the protocol.</p>
+                            <div id="adoption-chart-container" class="chart-container">
+                                <canvas id="adoptionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="content-vision" class="content-panel bg-white p-6 rounded-lg shadow-lg hidden">
+                    <h2 class="text-2xl font-bold text-teal-700 mb-4">The Vision: The "Agentic Economy"</h2>
+                    <p class="text-gray-700 mb-6">
+                        What is the ultimate goal of x402? It's not just a new way to pay; it's a foundational layer for a new 'agentic economy' where machines can autonomously transact. This final section explains this future vision, where AI agents can complete complex tasks by programmatically paying for the resources they need.
+                    </p>
+                    <div class="bg-gray-100 border border-gray-200 p-6 rounded-lg">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">Example: A "DIY" AI Agent</h3>
+                        <div class="flex flex-col items-center space-y-4">
+                            <div class="p-4 bg-white rounded-lg shadow-md font-semibold text-lg w-full md:w-auto text-center">
+                                1. User: "Help me fix my leaky pipe."
+                            </div>
+                            <div class="text-2xl font-bold text-teal-600">↓</div>
+                            <div class="p-4 bg-teal-100 border-2 border-teal-300 rounded-lg shadow-md font-semibold text-lg text-teal-800 w-full md:w-auto text-center">
+                                2. AI Agent
+                            </div>
+                            <div class="text-2xl font-bold text-teal-600">↓</div>
+                            <p class="text-gray-600">"To help, I need to..."</p>
+                            <div class="w-full md:w-3/4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                                    <div class="p-3 bg-white rounded-lg shadow-sm">
+                                        <p class="font-semibold text-gray-700">...pay an API for</p>
+                                        <p class="text-teal-700 font-medium">Real-Time Inventory</p>
+                                    </div>
+                                    <div class="p-3 bg-white rounded-lg shadow-sm">
+                                        <p class="font-semibold text-gray-700">...pay a service for</p>
+                                        <p class="text-teal-700 font-medium">a 3D Diagram</p>
+                                    </div>
+                                    <div class="p-3 bg-white rounded-lg shadow-sm">
+                                        <p class="font-semibold text-gray-700">...pay a bot to</p>
+                                        <p class="text-teal-700 font-medium">Order Parts</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-2xl font-bold text-teal-600">↓</div>
+                            <div class="p-4 bg-green-100 border-2 border-green-300 rounded-lg shadow-md font-semibold text-lg text-green-800 w-full md:w-auto text-center">
+                                3. Task Completed
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <footer class="text-center py-6 text-gray-500 text-sm">
+        Interactive report generated from x402 protocol analysis.
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const contentArea = document.getElementById('content-area');
+            const navigation = document.getElementById('navigation');
+            const navLinks = navigation.querySelectorAll('.nav-link');
+
+            navigation.addEventListener('click', (e) => {
+                const navLink = e.target.closest('.nav-link');
+                if (!navLink) return;
+
+                e.preventDefault();
+                const targetId = navLink.dataset.target;
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                });
+                navLink.classList.add('active');
+                
+                contentArea.querySelectorAll('.content-panel').forEach(panel => {
+                    if (panel.id === targetId) {
+                        panel.classList.remove('hidden');
+                    } else {
+                        panel.classList.add('hidden');
+                    }
+                });
+            });
+
+            function setupToggles(containerId, buttonSelector, contentSelector, defaultActive = true) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                const buttons = container.querySelectorAll(buttonSelector);
+                const contents = container.querySelectorAll(contentSelector);
+
+                container.addEventListener('click', (e) => {
+                    const button = e.target.closest(buttonSelector);
+                    if (!button) return;
+
+                    const targetId = button.dataset.target;
+
+                    buttons.forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    button.classList.add('active');
+
+                    contents.forEach(content => {
+                        if (content.id === targetId) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+
+                if (defaultActive && buttons.length > 0) {
+                    buttons[0].classList.add('active');
+                    if (contents.length > 0) {
+                        contents.forEach((content, index) => {
+                            content.classList.toggle('hidden', index !== 0);
+                        });
+                    }
+                }
+            }
+
+            setupToggles('content-technical', '.code-btn', '.code-snippet');
+            setupToggles('content-architecture', '.tab-btn', '.tab-content');
+            setupToggles('content-ecosystem', '.tab-btn', '.tab-content');
+
+            function renderAdoptionChart() {
+                const ctx = document.getElementById('adoptionChart');
+                if (!ctx) return;
+                
+                const chartData = {
+                    labels: ['Sept 1', 'Sept 15', 'Oct 1', 'Oct 15', 'Oct 26'],
+                    datasets: [{
+                        label: 'x402 On-Chain Transactions',
+                        data: [465, 4657, 46574, 93244, 932440],
+                        borderColor: '#0D9488', 
+                        backgroundColor: 'rgba(15, 118, 110, 0.1)',
+                        fill: true,
+                        tension: 0.1
+                    }]
+                };
+
+                const chartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    if (value >= 1000) {
+                                        return (value / 1000) + 'k';
+                                    }
+                                    return value;
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Transactions: ${context.parsed.y.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    }
+                };
+
+                new Chart(ctx.getContext('2d'), {
+                    type: 'line',
+                    data: chartData,
+                    options: chartOptions
+                });
+            }
+
+            renderAdoptionChart();
+
+        });
+    </script>
+
+</body>
+</html>
